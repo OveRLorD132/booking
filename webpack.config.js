@@ -4,7 +4,7 @@ import path from 'path';
 
 export default {
     mode: 'development',
-    entry: './src/Login/login.js',
+    entry: './src/Rent/rent.js',
     cache: {
         type: 'filesystem',
         allowCollectingMemory: true,
@@ -15,8 +15,8 @@ export default {
         splitChunks: false,
     },
     output: {
-        path: path.resolve(__dirname, 'public', 'javascripts', 'Login'),
-        filename: 'login.js',
+        path: path.resolve(__dirname, 'public', 'javascripts', 'Rent'),
+        filename: 'rent.js',
         clean: true,
     },
     module: {
@@ -29,6 +29,10 @@ export default {
                 test: /.css$/,
                 use: ['style-loader', 'css-loader'],
             },
+            {
+                test: /.scss$/,
+                use: ['style-loader', 'css-loader', 'sass-loader'],
+            }
         ]
     },
     plugins: [

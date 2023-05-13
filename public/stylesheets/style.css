@@ -1,6 +1,12 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font-family: 'Proxima-Nova';
+  padding: 0;
+  margin: 0;
+}
+
+@font-face {
+  font-family: 'Proxima-Nova';
+  src: url('/fonts/proxima_nova_reg.ttf');
 }
 
 a {

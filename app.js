@@ -9,10 +9,18 @@ import { sessionMiddleware } from './module/authentication/session.js';
 import authRoute from './routes/auth-route.js';
 import mainRouter from './routes/main.js';
 import usersRouter from './routes/users.js';
+import setupRouter from './routes/setup-data.js';
+import rentRouter from './routes/rent-route.js';
 
 let app = express();
 
 let server = createServer(app).listen(3000);
+
+export default server;
+
+import socketConnect from './module/sockets/setup.js';
+
+socketConnect();
 
 // view engine setup
 app.set('views', 'views');
@@ -28,6 +36,8 @@ sessionMiddleware(app);
 
 app.use(mainRouter);
 app.use(authRoute);
+app.use(setupRouter);
+app.use(rentRouter);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
@@ -46,4 +56,3 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-export default app;

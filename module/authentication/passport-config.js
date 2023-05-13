@@ -1,18 +1,23 @@
 import passport from "passport";
 import { Strategy } from 'passport-local'; 
 
+import UserRepostitory from "../db/postgres/user-repository.js";
+
+let userRepostitory = new UserRepostitory();
+
 import login from "./login.js";
 
 passport.use(new Strategy((username, password, done) => {
     login(username, password, done);
 }));
 
-passport.serializeUser((user, done) => {
-    delete user.password;
-    done(0, user);
+passport.serializeUser(({ id }, done) => {
+    console.log(id);
+    done(0, id);
 });
 
-passport.deserializeUser((user, done) => {
+passport.deserializeUser(async(id, done) => {
+    let user = await userRepostitory.getById(id);
     done(0, user);
 })
 

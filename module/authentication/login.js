@@ -1,10 +1,13 @@
-import Postgres from "../db/postgresql.js";
+import UserRepostitory from "../db/postgres/user-repository.js";
+
+let userRepostitory = new UserRepostitory();
 
 import Password from "../Password/Password.js";
 
 export default async function login(username, password, done) {
     try {
-        let user = await Postgres.prototype.getUserByUsername(username);
+        let user = await userRepostitory.getByUsername(username);
+        console.log(user);
         try {
             console.log(password);
             let match = Password.prototype.comparePassword(password, user.password);
