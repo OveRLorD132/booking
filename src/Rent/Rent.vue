@@ -6,7 +6,12 @@
                 <h2>
                     {{ rent.title }}
                 </h2>
-                <div class="adressLabel">{{ rent.adress }}</div>
+                <div class="adressContainer">
+                    <div class="adressLabel">{{ rent.adress }}</div>
+                    <div class="ratingLabel">{{  rent.rating }}: {{ comments.length }} 
+                    {{ comments.length > 1 ? 'comments' : 'comment'}}</div>
+                </div>
+
             </div>
             <div class="imagesContainer">
                 <img class="mainImage" src="/images/no-photo.png" />
@@ -21,27 +26,24 @@
             <div class="description">{{ rent.type }}, rent by Overlord</div>
             <div class="rentAbout">
                 <h3>About</h3>
-                <div class="mainDescription" v-html="rent.description"></div>
+                <div class="mainDescription">{{ rent.description }}</div>
             </div>
             <div class="rentPrice">
                 <h3>Price: </h3>
                 {{ rent.price }} per day.
             </div>
             <div class="comments">
-                <h2>Comments</h2>
+                <h2 :style="{ 'margin-left': '10px'}">Comments</h2>
                 <div class="commentsContainer">
-                    <form @submit.prevent="addComment">
-                        <input type="text" v-model="newComment" />
-                        <input type="submit" value="Send" /> 
-                    </form>
-                    <template v-for="comment in comments" :key="comment.id">
-                        <div >{{ comment.text }}</div>
-                    </template>
+                    <CommentInput :user="user" :rent="rent" :socket="socket"/>
+
+                    <div class="messagesContainer" >
+                        <CommentComponent v-for="comment in comments" :key="comment.id" :comment="comment" :user="user"/>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
 </template>
 
 <script setup>
@@ -50,10 +52,14 @@ import { ref, onMounted } from 'vue';
 import io from 'socket.io-client';
 let socket = io();
 import LineComponent from '../components/LineComponent.vue';
+import CommentInput from './components/CommentInput.vue';
+import CommentComponent from './components/CommentComponent.vue';
 
 let rent = ref(null);
 let user = ref(null);
 let comments = ref([]);
+socket = ref(socket);
+
 
 
 let loadProfile = (profile) => {
@@ -64,32 +70,31 @@ onMounted(async () => {
     try {
         axios.get(`${window.location.pathname}/rent`).then(({ data }) => {
             rent.value = data.rows[0];
-            socket.emit('load-request', rent.value.id);
+            socket.value.emit('load-request', rent.value.id);
         })
     } catch(err) {
         console.error(err);
     }
 })
-let newComment = ref(null);
 
-let addComment = () => {
-    socket.emit('add-comment', {
-        rent_id: rent.value.id,
-        text: newComment.value,
-        user_id: user.value.id,
-    });
-}
-socket.on('load-result', (response) => {
+socket.value.on('load-result', (response) => {
     comments.value = response;
 })
 
-socket.on('comment-added', (comment) => {
+socket.value.on('comment-added', (comment) => {
     comments.value.push(comment);
 })
 </script>
 
 <style scoped lang="scss">
 @import '../../public/stylesheets/colors.scss';
+
+.adressContainer {
+    max-width: 800px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
 .mainContainer {
     margin-top: 45px;
     display: flex;
@@ -115,6 +120,7 @@ socket.on('comment-added', (comment) => {
 
 .mainDescription {
     font-family: 'Proxima-Nova';
+    max-width: 800px;
 }
 
 .imagesContainer {
@@ -132,5 +138,11 @@ socket.on('comment-added', (comment) => {
 .sideImage {
     width: 200px;
     height: 200px;
+}
+
+.messagesContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 </style>

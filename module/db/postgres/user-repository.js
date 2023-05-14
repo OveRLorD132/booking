@@ -24,11 +24,14 @@ export default class UserRepostitory {
             })
         })
     }
-    createProfile(username, password, email) {
+    createProfile(obj) {
+        let values = Object.values(obj);
+        let keys = Object.keys(obj);
+        let query = `INSERT INTO users (${keys.join(", ")}) VALUES ($1, $2, $3, $4, $5) RETURNING *`;
         return new Promise((resolve, reject) => {
-            this.client.query(`INSERT INTO users (username, password, email) VALUES ($1, $2, $3)`, [username, password, email], (err, res) => {
+            this.client.query(query, values, (err, result) => {
                 if(err) reject(err);
-                resolve(res);
+                else resolve(result.rows[0]);
             })
         });
     }

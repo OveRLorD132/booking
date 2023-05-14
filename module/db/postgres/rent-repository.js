@@ -36,4 +36,12 @@ export default class RentRepostitory {
             })
         })
     }
+    calculateRating(avg_rating, id) {
+        return new Promise((resolve, reject) => {
+            this.client.query(`UPDATE rental_properties SET rating = $1 WHERE id = $2`, [avg_rating, id], (err, result) => {
+                if(err) reject(err);
+                resolve(result);
+            })
+        })
+    }
 }

@@ -23,9 +23,7 @@ router.post('/login', passport.authenticate('local', {
 router.post('/registration', async (req, res, next) => {
     try {
         let result = await registration(req.body);
-        console.log(result);
-        req.login(req.body, (err) => {
-            console.log(err);
+        req.login(result, (err) => {
             if(err) return next(err);
             res.redirect('/');
         })
