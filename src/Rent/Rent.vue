@@ -38,7 +38,9 @@
                     <CommentInput :user="user" :rent="rent" :socket="socket"/>
 
                     <div class="messagesContainer" >
-                        <CommentComponent v-for="comment in comments" :key="comment.id" :comment="comment" :user="user"/>
+                        <CommentComponent v-for="(comment, index) in comments" :key="comment.id" 
+                          :comment="comment" :user="user" :socket="socket" :index="index" :rent="rent"
+                        />
                     </div>
                 </div>
             </div>
@@ -54,6 +56,8 @@ let socket = io();
 import LineComponent from '../components/LineComponent.vue';
 import CommentInput from './components/CommentInput.vue';
 import CommentComponent from './components/CommentComponent.vue';
+
+import Comment from './module/Comment';
 
 let rent = ref(null);
 let user = ref(null);
@@ -78,11 +82,28 @@ onMounted(async () => {
 })
 
 socket.value.on('load-result', (response) => {
-    comments.value = response;
+    for(let comment of response) {
+        comment = new Comment(comment);
+        comments.value.push(comment);
+    }
 })
 
-socket.value.on('comment-added', (comment) => {
+socket.value.on('add-result', ({comment, rating}) => {
+    console.log(arguments);
+    comment = new Comment(comment);
     comments.value.push(comment);
+    rent.value.rating = rating;
+})
+
+socket.value.on('edit-result', (obj) => {
+    for(let comment of comments.value) {
+        if(obj.id === comment.id) comment.editComment(obj.text, obj.rating);
+    } 
+    rent.value.rating = obj.rent_rating;
+})
+socket.value.on('delete-result', ({index, rating}) => {
+    rent.value.rating = rating;
+    comments.value.splice(index, 1);
 })
 </script>
 

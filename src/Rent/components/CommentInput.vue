@@ -32,7 +32,7 @@ let newComment = ref(null);
 let props = defineProps({
     rent: Object,
     user: Object,
-    socket: Object,
+    socket: Object
 })
 
 let highlightStars = (index) => {
@@ -62,7 +62,7 @@ const starDisplay = computed(() => {
 });
 
 let addComment = () => {
-    if(!user) return;
+    if(!props.user) return;
     props.socket.emit('add-comment', {
         rent_id: props.rent.id,
         text: newComment.value,
@@ -108,16 +108,12 @@ let addComment = () => {
 }
 
 #submitButton {
-    cursor: pointer;
+    @include button-style;
     padding-right: 20px;
     padding-top: 10px;
     padding-bottom: 10px;
     padding-left: 20px;
     border-radius: 10px;
-    border: none;
-    font-family: 'Proxima-Nova';
     font-size: 16px;
-    color: #ffffff;
-    background-color: $button-red;
 }
 </style>

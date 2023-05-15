@@ -8,27 +8,37 @@
                 <div class="username">{{ comment.first_name }}</div>
             </div>
             <div class="commentRight">
-                <div class="rating">{{ comment.rating }}</div>
                 <div v-show="isHovered" @click="showEditingForm">
-                    <img class="editButton" src="/images/edit.png"/>
+                    <img class="commentButtons" src="/images/edit.png"/>
+                </div>
+                <div class="rating" v-if="!isEditing">{{ comment.rating }}</div>
+                <div v-if="isEditing"><input class="ratingInput" type="text" v-model="editedRating" /></div>
+                <div v-show="isHovered" @click="deleteComment">
+                    <img class="commentButtons" src="/images/delete.png"/>
                 </div>
             </div>
         </div>
         <div class="commentText">
             <template v-if="!isEditing">{{ comment.text }}</template>
-            <textarea v-if="isEditing" v-model="editedComment"/>
+            <textarea v-if="isEditing" class="editingArea" v-model="editedComment"/>
+        </div>
+        <div >
+            <button class="changeButton" @click="editText" v-if="isEditing">OK</button>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, watch } from 'vue';
 
 let isHovered = ref(null);
 
 let props = defineProps({
     user: Object,
     comment: Object,
+    socket: Object,
+    index: Number,
+    rent: Object
 })
 
 let showEdit = () => {
@@ -44,21 +54,39 @@ let hideEdit = () => {
 }
 
 let editedComment = ref(null);
+let editedRating = ref(null);
 let isEditing = ref(false);
 
 let showEditingForm = () => {
-    if(isEditing.value) editedComment.value = "";
-    else editedComment.value = props.comment.text;
+    if(isEditing.value) {
+        editedComment.value = "";
+        editedRating.value = 0;
+    } 
+    else {
+        editedComment.value = props.comment.text;
+        editedRating.value = props.comment.rating;
+    } 
     isEditing.value = !isEditing.value;
+}
+
+let editText = () => {
+    if(props.comment.text === editedComment.value && props.comment.rating === editedRating.value) return;
+    props.comment.emitEditing(props.socket, editedComment.value, props.comment.id, editedRating.value, props.rent.id);
+    isEditing.value = false;
+}
+
+let deleteComment = () => {
+    props.comment.emitDeleting(props.socket, props.comment.id, props.index, props.rent.id);
 }
 </script>
 
 <style scoped lang="scss">
+@import '../../../public/stylesheets/inputs.scss';
 @import '../../../public/stylesheets/colors.scss';
-.editButton {
+.commentButtons {
     cursor: pointer;
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
 }
 .comment {
     border-radius: 10px;
@@ -101,7 +129,26 @@ let showEditingForm = () => {
     align-items: center;
 }
 
+.editingArea {
+    background-color: transparent;
+    border: none;
+    font-family: 'Proxima-Nova';
+    width: 100%;
+    height: 125px;
+    resize: none;
+    overflow: hidden;
+}
+
 .commentText {
     margin-top: 10px;
+}
+
+.changeButton {
+    @include button-style;
+    font-size: 14px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 </style>

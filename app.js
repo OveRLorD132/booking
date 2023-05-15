@@ -11,6 +11,7 @@ import mainRouter from './routes/main.js';
 import usersRouter from './routes/users.js';
 import setupRouter from './routes/setup-data.js';
 import rentRouter from './routes/rent-route.js';
+import RentAddRouter from './routes/rent-add.js';
 
 let app = express();
 
@@ -38,6 +39,7 @@ app.use(mainRouter);
 app.use(authRoute);
 app.use(setupRouter);
 app.use(rentRouter);
+app.use(RentAddRouter);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler

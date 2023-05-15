@@ -10,7 +10,7 @@ export default function socketConnect() {
     console.log(io);
     io.on('connection', (socket) => {
         rentAdd(socket);
-        comments(socket);
+        comments(socket, io);
     })
 };
 

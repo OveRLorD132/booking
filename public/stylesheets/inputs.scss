@@ -4,7 +4,16 @@
     font-family: 'Proxima-Nova';
     outline: none;
     border-radius: 5px;
-    border-width: thin;
+    border: none;
     border-color: $description-grey;
     background-color: $input-back;
+}
+
+@mixin button-style {
+    background-color: $button-red;
+    cursor: pointer;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Proxima-Nova';
+    color: #ffffff;
 }
