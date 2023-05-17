@@ -1,23 +1,39 @@
 <template>
     <LineComponent />
     <div class="mainContainer">
-        <FirstStep v-if="step === 1" @type-chosen="setType" :rent_type="rent_type"/>
-        <SecondStep v-if="step === 2"/>
+        <FirstStep v-show="step === 1" @type-chosen="setType" :rent_type="rent_type"/>
+        <SecondStep v-show="step === 2" @address-chosen="setAddress"/>
+        <ThirdStep v-show="step === 3" @files-uploaded="filesUploaded"/>
+        <FourthStep v-show="step === 4" @description-input="setDescription" @header-input="setHeader" @price-input="setPrice"/>
+        <FifthStep v-show="step === 5" :rent="rent"/>
     </div>
     <div class="bottomLine">
-        <button class="lineButton backButton" @click="returnBack">Back</button>
-        <button class="lineButton nextButton" @click="nextStep">Next</button>
+        <div class="progressLine">
+            <div class="stepProgress" :style="firstStep"></div>
+            <div class="stepProgress" :style="secondStep"></div>
+            <div class="stepProgress" :style="thirdStep"></div>
+            <div class="stepProgress" :style="fourthStep"></div>
+        </div>
+        <div class="buttons">
+            <button class="lineButton backButton" @click="returnBack">Back</button>
+            <button class="lineButton nextButton" @click="nextStep">{{step === 4 ? "Complete" : "Next"}}</button>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import LineComponent from '../components/LineComponent.vue';
 
 import FirstStep from './components/FirstStep.vue'; 
 import SecondStep from './components/SecondStep.vue';
+import ThirdStep from './components/ThirdStep.vue';
+import FourthStep from './components/FourthStep.vue';
+import FifthStep from './components/FifthStep.vue';
 
 let step = ref(1);
+
+let rent = ref(null);
 
 let rent_type = ref(null);
 
@@ -26,9 +42,40 @@ let setType = (type) => {
     console.log(rent_type);
 }
 
+let address = ref(null);
+
+let setAddress = (addressArray) => {
+    address.value = addressArray;
+}
+
 let returnBack = () => {
     if(step.value <= 1) return;
     step.value--;
+}
+
+let images = ref([])
+
+function filesUploaded(imgArray) {
+    images.value = imgArray;
+    console.log(images);
+}
+
+let header = ref(null);
+
+function setHeader(newHeader) {
+    header.value = newHeader;
+}
+
+let description = ref(null);
+
+function setDescription(newDescription) {
+    description.value = newDescription;
+}
+
+let price = ref(null);
+
+function setPrice(newPrice) {
+    price.value = newPrice;
 }
 
 let nextStep = () => {
@@ -38,34 +85,95 @@ let nextStep = () => {
             if(!rent_type.value) return;
             step.value++;
             return;
+        case 2:
+            if(!address.value) return;
+            step.value++;
+            return;
+        case 3:
+            if(images.value.length < 5) return;
+            step.value++;
+            break;
+        case 4: 
+            if(rent_type.value && address.value && images.value.length >= 5 && description.value && header.value 
+            && price.value && typeof +price.value === 'number') {
+                setRent(rent_type.value, address.value, images.value, description.value, header.value, price.value);
+                step.value++;
+            }
         default: 
             break;
     }
     //step.value++;
 }
 
+function setRent(type, address, images, description, header, price) {
+    rent.value = { type, address, images, description, header, price};
+    console.log(rent);
+}
+
+
+
+let firstStep = computed(() => {
+    return {
+        backgroundColor: step.value >= 2 ? "black" : "#ADADAD"
+    }
+})
+
+let secondStep = computed(() => {
+    return {
+        backgroundColor: step.value >= 3 ? "black" : "#ADADAD"
+    }
+})
+
+let thirdStep = computed(() => {
+    return {
+        backgroundColor: step.value >= 4 ? "black" : "#ADADAD"
+    }
+})
+
+let fourthStep = computed(() => {
+    return {
+        backgroundColor: step.value >= 5 ? "black" : "#ADADAD"
+    }
+})
 </script>
 
 <style scoped lang="scss">
 @import '../../public/stylesheets/inputs.scss';
 .mainContainer {
     overflow-x: hidden;
+    overflow-x: auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    min-height: calc(100vh - 125px);
     width: 100%;
+    margin-bottom: 75px;
+    margin-top: 50px;
 } 
 
 .bottomLine {
+    width: 100%;
     position: fixed;
     bottom: 0;
+}
+
+.progressLine {
+    display: flex;
+    height: 5px;
+}
+
+.stepProgress {
+    flex: 1;
+    height: 100%;
+}
+
+.buttons {
     height: 70px;
     width: 100%;
-    box-shadow: 0px -1px 2px 0px rgba(0,0,0,0.75);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: #ffffff;
 }
 
 .lineButton {
