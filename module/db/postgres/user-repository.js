@@ -35,4 +35,20 @@ export default class UserRepostitory {
             })
         });
     }
+    addToWishlist(id, user_id) {
+        return new Promise((resolve, reject) => {
+            this.client.query(`UPDATE users SET wishlist = wishlist || $1 WHERE id = $2`, [[id], user_id], (err, result) => {
+                if(err) reject(err);
+                resolve(result);
+            })
+        })
+    }
+    removeFromWishlist(id, user_id) {
+        return new Promise((resolve, reject) => {
+            this.client.query(`UPDATE users SET wishlist = array_remove(wishlist, $1) WHERE id = $2`, [+id, user_id], (err, result) => {
+                if(err) reject(err);
+                resolve(result);
+            })
+        })
+    }
 }

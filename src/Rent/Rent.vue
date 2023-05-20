@@ -3,37 +3,28 @@
     <div class="mainContainer" v-if="rent">
         <div class="rentContainer">
             <div class="rentTitle">
-                <h2>
-                    {{ rent.title }}
-                </h2>
+                <h1>
+                    {{ rent.header }}
+                </h1>
                 <div class="adressContainer">
-                    <div class="adressLabel">{{ rent.adress }}</div>
+                    <div class="adressLabel">{{ rent.address }}</div>
                     <div class="ratingLabel">{{  rent.rating }}: {{ comments.length }} 
-                    {{ comments.length > 1 ? 'comments' : 'comment'}}</div>
+                    {{ comments.length !== 1 ? 'comments' : 'comment'}}</div>
                 </div>
 
             </div>
-            <div class="imagesContainer">
-                <img class="mainImage" src="/images/no-photo.png" />
-                <div class="sideImages">
-                    <img class="sideImage" src="/images/no-photo.png" />
-                    <img class="sideImage" src="/images/no-photo.png" />
-                    <img class="sideImage" src="/images/no-photo.png" />
-                    <img class="sideImage" src="/images/no-photo.png" />
-                </div>
-            </div>
-
-            <div class="description">{{ rent.type }}, rent by Overlord</div>
+            <ImagesComponent :images-count="rent.images_count" :directory="directory"/>
+            <div class="description"><h2>{{ rent.type }}, rent by {{ rent.user_name }}</h2></div>
             <div class="rentAbout">
-                <h3>About</h3>
+                <h1>About</h1>
                 <div class="mainDescription">{{ rent.description }}</div>
             </div>
             <div class="rentPrice">
-                <h3>Price: </h3>
+                <h2>Price: </h2>
                 {{ rent.price }} per day.
             </div>
             <div class="comments">
-                <h2 :style="{ 'margin-left': '10px'}">Comments</h2>
+                <h1>Comments</h1>
                 <div class="commentsContainer">
                     <CommentInput :user="user" :rent="rent" :socket="socket"/>
 
@@ -56,6 +47,7 @@ let socket = io();
 import LineComponent from '../components/LineComponent.vue';
 import CommentInput from './components/CommentInput.vue';
 import CommentComponent from './components/CommentComponent.vue';
+import ImagesComponent from './components/ImagesComponent.vue';
 
 import Comment from './module/Comment';
 
@@ -64,7 +56,7 @@ let user = ref(null);
 let comments = ref([]);
 socket = ref(socket);
 
-
+let directory = ref(null);
 
 let loadProfile = (profile) => {
     user.value = profile;
@@ -74,6 +66,7 @@ onMounted(async () => {
     try {
         axios.get(`${window.location.pathname}/rent`).then(({ data }) => {
             rent.value = data.rows[0];
+            directory.value = `/rent-photos/${rent.value.user_name + rent.value.user_id}/${rent.value.id}/`;
             socket.value.emit('load-request', rent.value.id);
         })
     } catch(err) {
@@ -109,9 +102,16 @@ socket.value.on('delete-result', ({index, rating}) => {
 
 <style scoped lang="scss">
 @import '../../public/stylesheets/colors.scss';
+.rentTitle {
+    align-self: flex-start;
+    width: 100%;
+}
+
+.rentPrice {
+    align-self: flex-start;
+}
 
 .adressContainer {
-    max-width: 800px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -124,14 +124,11 @@ socket.value.on('delete-result', ({index, rating}) => {
 }
 
 .rentContainer {
-    width: 100%;
-    margin-left: 200px;
-    margin-right: 200px;
-}
-
-.mainImage {
-    width: 400px;
-    height: 400px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding-left: 100px;
+    padding-right: 100px;
 }
 
 .adressLabel {
@@ -139,31 +136,27 @@ socket.value.on('delete-result', ({index, rating}) => {
     text-decoration: underline;
 }
 
+.rentAbout {
+    align-self: flex-start;
+}
+
 .mainDescription {
     font-family: 'Proxima-Nova';
-    max-width: 800px;
-}
-
-.imagesContainer {
-    display: flex;
-    flex-direction: row;
-}
-
-.sideImages {
-    display: flex;
-    flex-direction: row;
-    width: 400px;
-    flex-wrap: wrap;
-}
-
-.sideImage {
-    width: 200px;
-    height: 200px;
+    font-size: 17px;
+    max-width: 500px;
 }
 
 .messagesContainer {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+}
+
+.description {
+    align-self: flex-start;
+}
+
+.comments {
+    align-self: flex-start;
 }
 </style>

@@ -13,7 +13,7 @@
             </div>
 
         </div>
-        <div class="type">{{ rent.type }}, rent by Overlord</div>
+        <div class="type">{{ rent.type }}, rent by {{ userProfile.first_name }}</div>
         <div class="rentAbout">
             <h3>About</h3>
             <div class="description">{{ rent.description }}</div>
@@ -28,7 +28,8 @@
 <script setup>
 
 let props = defineProps({
-    rent: Object
+    rent: Object,
+    userProfile: Object
 })
 
 </script>

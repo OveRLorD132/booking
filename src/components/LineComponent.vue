@@ -24,6 +24,7 @@ try {
 .mainLineContainer {
     @include space-between;
     position: fixed;
+    z-index: 999;
     top: 0;
     width: 100%;
     padding-top: 10px;

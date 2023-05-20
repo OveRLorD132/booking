@@ -1,11 +1,11 @@
 <template>
-    <LineComponent />
+    <LineComponent @load-profile="loadProfile"/>
     <div class="mainContainer">
         <FirstStep v-show="step === 1" @type-chosen="setType" :rent_type="rent_type"/>
         <SecondStep v-show="step === 2" @address-chosen="setAddress"/>
         <ThirdStep v-show="step === 3" @files-uploaded="filesUploaded"/>
         <FourthStep v-show="step === 4" @description-input="setDescription" @header-input="setHeader" @price-input="setPrice"/>
-        <FifthStep v-show="step === 5" :rent="rent"/>
+        <FifthStep v-show="step === 5" :rent="rent" :user-profile="profile"/>
     </div>
     <div class="bottomLine">
         <div class="progressLine">
@@ -22,6 +22,8 @@
 </template>
 
 <script setup>
+import axios from 'axios';
+
 import { computed, ref } from 'vue';
 import LineComponent from '../components/LineComponent.vue';
 
@@ -36,6 +38,12 @@ let step = ref(1);
 let rent = ref(null);
 
 let rent_type = ref(null);
+
+let profile = ref(null);
+
+function loadProfile(userProfile) {
+    profile.value = userProfile;
+}
 
 let setType = (type) => {
     rent_type.value = type;
@@ -99,6 +107,17 @@ let nextStep = () => {
                 setRent(rent_type.value, address.value, images.value, description.value, header.value, price.value);
                 step.value++;
             }
+        case 5:
+            try {
+                axios.post('/new-rent', {rent: rent.value, user: {id: profile.value.id, name: profile.value.first_name}}).then(({data}) => {
+                    window.location.href = `/booking/rent/${data}`;
+                })
+            } catch(err) {
+                window.location.reload();
+            }
+
+            
+            break;
         default: 
             break;
     }
@@ -107,7 +126,6 @@ let nextStep = () => {
 
 function setRent(type, address, images, description, header, price) {
     rent.value = { type, address, images, description, header, price};
-    console.log(rent);
 }
 
 

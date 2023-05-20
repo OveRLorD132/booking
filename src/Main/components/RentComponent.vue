@@ -1,11 +1,8 @@
 <template>
-    <div class="rentContainer" @mouseover="hoverShow" @mouseleave="hoverHide">
-        <a class="rentLink" :href="rentLink">
-            <div class="mainImage">
-                <div class="hoverContainer" v-if="isHovered"></div>
-                <img src="/images/no-photo.png" />
-            </div>
-        </a>
+    <div class="rentContainer">
+        <div class="mainImage">
+            <RentImage @to-wish="onToWish" @remove-wish="onRemoveWish" :directory="imageDirectoty" :rent="rent" :user="user"/>
+        </div>
         <div class="rentDescription">
             <a class="rentLink" href="/booking/rent">
                 <div class="adressLabel">
@@ -13,35 +10,40 @@
                 </div>
             </a>
             <div class="descriptionLabel">
-                {{ rent }}
+                Rent by {{ rent.user_name }}
             </div>
             <div class="priceLabel">
-                price: {{  rent.price }}$ per day.
+                {{  rent.price }}$ per day.
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import RentImage from './RentImage.vue';
+
+import { ref } from 'vue';
 
 let props = defineProps({
+    user: Object,
     rent: Object,
 })
 
-let rentLink = ref(`/booking/rent/${props.rent.id}`);
+let emits = defineEmits({
+    'to-wish': (id) => typeof id === 'number',
+    'remove-wish': (id) => typeof id ==='number', 
+})
 
-let isHovered = ref(false);
+let imageDirectoty = ref(`/rent-photos/${props.rent.user_name + props.rent.user_id}/${props.rent.id}/`);
 
-let hoverShow = () => {
-    isHovered.value = true;
+
+function onToWish(id) {
+    emits('to-wish', id);
 }
 
-let hoverHide = () => {
-    isHovered.value = false;
+function onRemoveWish(id) {
+    emits('remove-wish', id);
 }
-
-
 </script>
 
 <style scoped lang="scss">
@@ -51,8 +53,8 @@ let hoverHide = () => {
     cursor: pointer;
 }
 .hoverContainer {
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
     border-radius: 10px;
     position: fixed;
     background-color: rgb(245, 245, 245, 0.5);
@@ -61,9 +63,6 @@ let hoverHide = () => {
     margin-left: 10px;
     margin-right: 10px;
     margin-bottom: 10px;
-}
-.rentDescription {
-    margin-left: 10px;
 }
 .adressLabel {
     font-weight: bold;

@@ -1,5 +1,5 @@
 <template>
-    <div :style="{ 'margin-left': '10px'}">{{ user ? "Add your comment" : "You must be authenticated to add a comment"}}</div>
+    <div>{{ user ? "Add your comment" : "You must be authenticated to add a comment"}}</div>
     <div class="starContainer">
         <div class="star" 
           v-for="index in 5" 

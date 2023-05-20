@@ -8,15 +8,17 @@ export default class RentRepostitory {
         this.client.connect();
     }
     addRent(rentalObject) {
+        console.log(rentalObject);
         let keys = Object.keys(rentalObject);
         let values = Object.values(rentalObject);
         let placeholders = values.map((_, index) => `$${index + 1}`).join(", ");
         console.log([keys, values, placeholders]);
-        let query = `INSERT INTO rental_properties (${keys.join(", ")}) VALUES (${placeholders})`;
+        let query = `INSERT INTO rental_properties (${keys.join(", ")}) VALUES (${placeholders}) RETURNING id`;
         return new Promise((resolve, reject) => {
             this.client.query(query, values, (err, result) => {
                 if(err) reject(err);
-                resolve(result);
+                console.log(result);
+                resolve(result.rows[0]);
             })
         })
     }
