@@ -8,17 +8,14 @@ export default class RentRepostitory {
         this.client.connect();
     }
     addRent(rentalObject) {
-        console.log(rentalObject);
         let keys = Object.keys(rentalObject);
         let values = Object.values(rentalObject);
         let placeholders = values.map((_, index) => `$${index + 1}`).join(", ");
-        console.log([keys, values, placeholders]);
         let query = `INSERT INTO rental_properties (${keys.join(", ")}) VALUES (${placeholders}) RETURNING id`;
         return new Promise((resolve, reject) => {
             this.client.query(query, values, (err, result) => {
                 if(err) reject(err);
-                console.log(result);
-                resolve(result.rows[0]);
+                else resolve(result.rows[0]);
             })
         })
     }
@@ -34,7 +31,7 @@ export default class RentRepostitory {
         return new Promise((resolve, reject) => {
             this.client.query(`SELECT * FROM rental_properties WHERE id = $1`, [id], (err, result) => {
                 if(err) reject(err);
-                resolve(result);
+                resolve(result.rows[0]);
             })
         })
     }
@@ -45,5 +42,13 @@ export default class RentRepostitory {
                 resolve(result);
             })
         })
+    }
+    async getWishlist(wishlist) {
+        if(!wishlist) return [];
+        let result = [];
+        for(let wish_id of wishlist) {
+            result.push(await this.getRentById(wish_id));
+        }
+        return result;
     }
 }

@@ -12,6 +12,7 @@ import usersRouter from './routes/users.js';
 import setupRouter from './routes/setup-data.js';
 import rentRouter from './routes/rent-route.js';
 import RentAddRouter from './routes/rent-add.js';
+import profileRouter from './routes/profile-route.js'; 
 
 let app = express();
 
@@ -40,6 +41,7 @@ app.use(authRoute);
 app.use(setupRouter);
 app.use(rentRouter);
 app.use(RentAddRouter);
+app.use(profileRouter);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler

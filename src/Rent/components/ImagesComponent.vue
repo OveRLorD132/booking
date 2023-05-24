@@ -1,28 +1,16 @@
 <template>
-    <div class="fullImageContainer" v-if="chosenImage" @click="hideFullImage">
-        <img class="nextButton" src="/images/imgButton.png" @click.stop="nextImage" 
-          v-show="chosenImage === 'Main' || chosenImage < imagesCount"
-        />
-        <img class="backButton" src="/images/imgButton.png" @click.stop="back" 
-          v-show="chosenImage !== 'Main' || chosenImage > imagesCount"
-        />
-        <img :src="chosenImageSource" class="fullImage" @click.stop />
-    </div>
-    <div class="imagesContainer" @mouseover="showButtons" @mouseleave="hideButtons">
-        <img class="nextPage" src="/images/imgButton.png" @click.stop="nextPage" v-if="isHovered && !((4 + (page * 8)) >= imagesCount)"/>
-        <img class="backPage" src="/images/imgButton.png" @click.stop="backPage" v-if=" isHovered && page !== 0"/>
-        <ImageComponent :name="'Main'" :image="`${directory}Main.png`" @image-chosen="setChosenImage" v-if="!page"/>
+    <div class="imagesContainer">
+        <ImageComponent :name="'Main'" :image="`${directory}Main.png`" @image-chosen="setChosenImage"/>
         <div class="sideImagesContainer">
-            <ImageComponent v-for="num in (page === 0 ? 4 : (imagesCount - photosBefore - photosAfter))" 
-              :image="`${directory}${num + photosBefore}.png`" 
-              :name="num + photosBefore" @image-chosen="setChosenImage"
+            <ImageComponent v-for="num in 4" 
+              :image="`${directory + num}.png`" 
+              :name="num" @image-chosen="showAllImages"
             />
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
 
 import ImageComponent from './ImageComponent.vue';
 
@@ -31,73 +19,6 @@ let props = defineProps({
     imagesCount: Number,
 })
 
-let isHovered = ref(null);
-
-let chosenImage = ref(null);
-
-let chosenImageSource = ref(null);
-
-let page = ref(0);
-
-let photosAfter = ref(0);
-
-let photosBefore = ref(null);
-
-watch(page, (newValue, oldValue) => {
-    if(newValue === 0) {
-        photosBefore.value = 0;
-    } else if(newValue === 1) {
-        photosBefore.value = 4;
-    } else {
-        if(oldValue > newValue) photosBefore.value -= 8;
-        else photosBefore.value += 8;
-    } 
-    photosAfter.value = props.imagesCount - photosBefore.value - 8;
-    if(photosAfter.value < 0) photosAfter.value = 0;
-})
-
-watch(chosenImage, (newValue) => {
-    chosenImageSource.value = `${props.directory}${newValue}.png`
-})
-
-function setChosenImage(name) {
-    chosenImage.value = name;
-}
-
-function nextImage() {
-    if(chosenImage.value === 'Main') {
-        chosenImage.value = 1;
-        return;
-    } else chosenImage.value++;
-}
-
-function back() {
-    if(chosenImage.value === 1) {
-        chosenImage.value = 'Main';
-        return;
-    } else chosenImage.value--;
-}
-
-function hideFullImage() {
-    chosenImage.value = "";
-}
-
-function nextPage() {
-    page.value++;
-}
-
-function backPage() {
-    page.value--;
-}
-
-
-function showButtons() {
-    isHovered.value = true;
-}
-
-function hideButtons() {
-    isHovered.value = false;
-}
 </script>
 
 <style lang="scss">

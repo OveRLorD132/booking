@@ -2,10 +2,10 @@
     <div class="imageContainer" @mouseover="hoverShow" @mouseleave="hoverHide">
         <div class="hoverContainer" v-if="isHovered">
             <img src="/images/wish.png" class="wishListButton" 
-              v-if="!user || !user.wishlist.includes(+rent.id)" @click="toWishList"
+              v-if="!user || !user.wishlist || !user.wishlist.includes(+rent.id)" @click="toWishList"
             />
             <img src="/images/wished.png" class="wishListButton" 
-              v-if="user && user.wishlist.includes(+rent.id)" @click="removeFromWishlist"
+              v-if="user && user.wishlist && user.wishlist.includes(+rent.id)" @click="removeFromWishlist"
             />
             <img src="/images/imgButton.png" class="next" v-if="page < rent.images_count" @click.stop="nextPage"/>
             <img src="/images/imgButton.png" class="back" v-if="page > 0" @click.stop="back"/>

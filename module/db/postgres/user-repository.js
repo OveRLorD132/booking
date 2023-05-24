@@ -1,3 +1,4 @@
+import { query } from "express";
 import pgk from "pg";
 
 let { Client } = pgk;
@@ -48,6 +49,15 @@ export default class UserRepostitory {
             this.client.query(`UPDATE users SET wishlist = array_remove(wishlist, $1) WHERE id = $2`, [+id, user_id], (err, result) => {
                 if(err) reject(err);
                 resolve(result);
+            })
+        })
+    }
+    changeUserProperty(name, value, id) {
+        return new Promise((resolve, reject) => {
+            let query = `UPDATE users SET ${name} = $1 WHERE id = $2`
+            this.client.query(query, [value, id], (err, result) => {
+                if(err) reject(err);
+                else resolve(result)
             })
         })
     }

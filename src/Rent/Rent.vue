@@ -1,5 +1,11 @@
 <template>
     <LineComponent @load-profile="loadProfile"/>
+    <Transition name="show-all-images">
+        <AllImages :directory="directory" :imagesCount="rent.images_count" 
+          @hide-dialog="hideAllImages" v-if="rent && allImagesIsVisible"
+        />
+    </Transition>
+    
     <div class="mainContainer" v-if="rent">
         <div class="rentContainer">
             <div class="rentTitle">
@@ -7,13 +13,13 @@
                     {{ rent.header }}
                 </h1>
                 <div class="adressContainer">
-                    <div class="adressLabel">{{ rent.address }}</div>
+                    <div class="adressLabel">{{ rent.address.addressLine }}</div>
                     <div class="ratingLabel">{{  rent.rating }}: {{ comments.length }} 
                     {{ comments.length !== 1 ? 'comments' : 'comment'}}</div>
                 </div>
 
             </div>
-            <ImagesComponent :images-count="rent.images_count" :directory="directory"/>
+            <ImagesComponent :images-count="rent.images_count" :directory="directory" @click="showAllImages"/>
             <div class="description"><h2>{{ rent.type }}, rent by {{ rent.user_name }}</h2></div>
             <div class="rentAbout">
                 <h1>About</h1>
@@ -44,6 +50,7 @@ import axios from 'axios';
 import { ref, onMounted } from 'vue';
 import io from 'socket.io-client';
 let socket = io();
+import AllImages from './components/AllImages.vue';
 import LineComponent from '../components/LineComponent.vue';
 import CommentInput from './components/CommentInput.vue';
 import CommentComponent from './components/CommentComponent.vue';
@@ -54,6 +61,7 @@ import Comment from './module/Comment';
 let rent = ref(null);
 let user = ref(null);
 let comments = ref([]);
+let allImagesIsVisible = ref(false);
 socket = ref(socket);
 
 let directory = ref(null);
@@ -65,7 +73,8 @@ let loadProfile = (profile) => {
 onMounted(async () => {
     try {
         axios.get(`${window.location.pathname}/rent`).then(({ data }) => {
-            rent.value = data.rows[0];
+            rent.value = data;
+            rent.value.address = JSON.parse(data.address);
             directory.value = `/rent-photos/${rent.value.user_name + rent.value.user_id}/${rent.value.id}/`;
             socket.value.emit('load-request', rent.value.id);
         })
@@ -98,6 +107,14 @@ socket.value.on('delete-result', ({index, rating}) => {
     rent.value.rating = rating;
     comments.value.splice(index, 1);
 })
+
+function showAllImages() {
+    allImagesIsVisible.value = true;
+}
+
+function hideAllImages() {
+    allImagesIsVisible.value = false;
+}
 </script>
 
 <style scoped lang="scss">
@@ -158,5 +175,23 @@ socket.value.on('delete-result', ({index, rating}) => {
 
 .comments {
     align-self: flex-start;
+}
+
+.show-all-images-enter-active {
+    transition: all .3s;
+}
+
+.show-all-images-leave-active {
+    transition: all .3s;
+}
+
+.show-all-images-enter-from {
+    opacity: 0;
+    transform: translateY(100vh);
+}
+
+.show-all-images-leave-to {
+    opacity: 0;
+    transform: translateY(100vh);
 }
 </style>

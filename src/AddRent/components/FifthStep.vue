@@ -1,76 +1,58 @@
 <template>
-    <div class="mainStepContainer" v-if="rent">
-        <h2>{{ rent.header }}</h2>
-        <div class="addressLabel">{{ rent.address }}</div>
-        <div class="imagesContainer">
-            <img :src="rent.images[0].src" class="rentImage mainImage"/>
-            <div class="otherImagesContainer">
-                <template v-for="(image, index) in rent.images">
-                    <img  class="rentImage otherImages" v-if="!image.isMain"
-                      :style="{ marginRight: index % 2 === 1 ? '10px' : '0'}" :src="image.src"
-                    />
-                </template>
-            </div>
-
-        </div>
-        <div class="type">{{ rent.type }}, rent by {{ userProfile.first_name }}</div>
-        <div class="rentAbout">
-            <h3>About</h3>
-            <div class="description">{{ rent.description }}</div>
-        </div>
-        <div class="price">
-            <h3>Price</h3>
-            {{ rent.price }} per day.
-        </div>
+    <div class="mainStepContainer">
+        <h1>Enter a header</h1>
+        <input class="mainInput headerInput" type="text" placeholder="Header" v-model="header"/>
+        <h1>Enter price per day</h1>
+        <input type="text" class="mainInput headerInput" placeholder="Price" v-model="price"/>
+        <h1>Enter description</h1>
+        <textarea class="mainInput descriptionInput" v-model="description"></textarea>
     </div>
 </template>
 
 <script setup>
+import { ref, watch } from 'vue';
 
-let props = defineProps({
-    rent: Object,
-    userProfile: Object
+let header = ref(null);
+
+let description = ref(null);
+
+let price = ref(null);
+
+let emits = defineEmits({
+    'header-input': (text) => typeof text === "string",
+    'description-input': (text) => typeof text === "string",
+    'price-input': (price) => typeof price === "number",
 })
 
+watch(header, (newValue) => {
+    emits('header-input', newValue);
+})
+
+watch(description, (newValue) => {
+    emits('description-input', newValue);
+})
+
+watch(price, (newValue) => {
+    emits('price-input', newValue);
+})
 </script>
 
 <style scoped lang="scss">
-@import '../../../public/stylesheets/colors.scss';
-.imagesContainer {
+@import '../../../public/stylesheets/inputs.scss';
+.mainStepContainer {
     display: flex;
-    flex-direction: row;
-    max-width: 830px;
-    max-height: 400px;
+    flex-direction: column;
 }
-
-.otherImagesContainer {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+.headerInput {
+    height: 50px;
+    font-size: 16px;
+    padding-left: 10px;
 }
-.rentImage {
-    object-position: center;
-    object-fit: cover;
-    margin-bottom: 10px;
-}
-
-.otherImages {
-    width: 200px;
-    height: 200px;
-}
-
-.mainImage {
-    margin-right: 10px;
-    width: 410px;
-    height: 410px;
-}
-
-.type {
-    margin-top: 15px;
-    color: $active-grey;
-}
-
-.addressLabel {
-    text-decoration: underline;
+.descriptionInput {
+    font-size: 16px;
+    padding: 10px 10px 10px 10px;
+    width: 600px;
+    height: 300px;
+    resize: none;
 }
 </style>

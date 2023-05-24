@@ -1,7 +1,7 @@
 <template>
     <div class="rentContainer">
         <div class="mainImage">
-            <RentImage @to-wish="onToWish" @remove-wish="onRemoveWish" :directory="imageDirectoty" :rent="rent" :user="user"/>
+            <RentImage @to-wish="onToWish" @remove-wish="onRemoveWish" :directory="imageDirectory" :rent="rent" :user="user"/>
         </div>
         <div class="rentDescription">
             <a class="rentLink" href="/booking/rent">
@@ -34,7 +34,7 @@ let emits = defineEmits({
     'remove-wish': (id) => typeof id ==='number', 
 })
 
-let imageDirectoty = ref(`/rent-photos/${props.rent.user_name + props.rent.user_id}/${props.rent.id}/`);
+let imageDirectory = ref(`/rent-photos/${props.rent.user_name + props.rent.user_id}/${props.rent.id}/`);
 
 
 function onToWish(id) {
@@ -47,7 +47,7 @@ function onRemoveWish(id) {
 </script>
 
 <style scoped lang="scss">
-@import '../../../public/stylesheets/colors.scss';
+@import '../../public/stylesheets/colors.scss';
 
 .mainImage {
     cursor: pointer;

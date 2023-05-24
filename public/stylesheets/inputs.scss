@@ -17,3 +17,12 @@
     font-family: 'Proxima-Nova';
     color: #ffffff;
 }
+
+@mixin profile-buttons {
+    cursor: pointer;
+    border-radius: 15px;
+    font-family: 'Proxima-Nova';
+    color: #ffffff;
+    border: none;
+    padding: 15px 15px 15px 15px;
+}

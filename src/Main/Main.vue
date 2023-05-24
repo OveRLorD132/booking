@@ -10,7 +10,7 @@ import io from 'socket.io-client';
 import axios from 'axios';
 let socket = io();
 import Rent from './module/Rent';
-import RentComponent from './components/RentComponent.vue';
+import RentComponent from '../components/RentComponent.vue';
 import LineComponent from '../components/LineComponent.vue';
 
 import { ref } from 'vue';
@@ -36,6 +36,7 @@ socket.value.on('load-list', (list) => {
 async function onToWish(id) {
     try {
         await axios.patch('/booking/to-wish', {id: id, user_id: user.value.id});
+        if(!user.value.wishlist) user.value.wishlist = [];
         user.value.wishlist.push(+id);
         console.log(user)
     } catch(err) {

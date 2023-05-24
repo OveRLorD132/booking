@@ -1,165 +1,108 @@
 <template>
-    <div class="mainStepContainer">
-        <div class="notUploaded" v-if="uploadedFiles.length === 0">
-            <div class="inputContainer">
-                <h1 :style="{textAlign: 'center'}">Upload images</h1>
-                <div class="dragArea" @dragover="handleDragOver" @drop="handleFileDrop">
-                    <img class="imagesPic" src="/images/images.png"/>
-                    <h1>Drop files here</h1>
-                    <label class="imageInput" for="imgInput">Select Files</label>
-                </div>
+    <div class="thirdStepValue">
+        <h1 class="header">Enter Address</h1>
+        <div class="addressInputContainer">
+            <div class="addressLine firstLine">
+                Country
+                <input type="text" class="lineInput" placeholder="Enter country..." v-model="country"/>
+            </div>
+            <div class="addressLine firstLine">
+                Address
+                <input type="text" class="lineInput" placeholder="Enter address...." v-model="addressLine"/>
+            </div>
+            <div class="addressLine firstLine">
+                City
+                <input type="text" class="lineInput" placeholder="Enter city..." v-model="city"/>
+            </div>
+            <div class="addressLine">
+                Index
+                <input type="text" class="lineInput" placeholder="Enter index..." v-model="postIndex"/>
             </div>
         </div>
-        <div class="uploaded" v-if="uploadedFiles.length > 0">
-            <div class="addContainer">
-                <h1>You need at least 5 photos</h1>
-                <label class="imageInput  inputButton" for="imgInput">Select Files</label>
-            </div>
-            <div class="uploadedImages">
-                <ImageComponent v-for="(file, index) in uploadedFiles" :index="index" :image="file" 
-                  :uploaded-files="uploadedFiles" @set-main="setMain" @push-further="pushFurther" 
-                  @push-back="pushBack" @delete-image="deleteImage"
-                />
-            </div>
-        </div>
-        <input :style="{display: 'none'}" id="imgInput" type="file" @change="handleFileUpload" multiple/>
     </div>
 </template>
 
 <script setup>
-import ImageComponent from './ImageComponent.vue';
-
 import { ref, watch } from 'vue';
 
+let props = defineProps({
+    address: Array,
+})
+
 let emits = defineEmits({
-    'files-uploaded': null,
+    'address-input': null,
+    'country-input': null,
+    'city-input': null,
+    'post-index-input': null
 })
 
-let uploadedFiles = ref([]);
+let addressLine = ref(null);
 
-watch(() => uploadedFiles.value.length, () => {
-    emits('files-uploaded', uploadedFiles.value);
+let country = ref(null);
+
+let city = ref(null);
+
+let postIndex = ref(null);
+
+
+watch(props, (newValue) => {
+    console.log(newValue);
+    let address = newValue.address;
+    country.value = address.filter((component) => component.types[0] === 'country').map((component) => component.long_name);
+    postIndex.value = address.filter((component) => component.types[0] === 'postal_code').map((component) => component.long_name);
+    city.value = address.filter((component) => component.types[0] === 'locality').map((component) => component.long_name);
+    let addressLineComponents = address.filter((component) => component.types[0] === 'street_number' || component.types[0] === 'route');
+    addressLine.value =  addressLineComponents[1] && addressLineComponents[0] ? addressLineComponents[0] ?
+        addressLineComponents[1].long_name + ', ' + addressLineComponents[0].long_name : 
+        addressLineComponents[0].long_name :  "";
 })
 
-let handleFileUpload = (event) => {
-    let images = event.target.files;
-    for(let image of images) {
-        processUploadedFiles(image);
-    }
-}
+watch(addressLine, () => {
+    emits('address-input', addressLine.value)
+})
 
-let handleDragOver = (e) => {
-    e.preventDefault();
-}
+watch(country, () => {
+    emits('country-input', country.value)
+})
 
-let handleFileDrop = (e) =>{
-    e.preventDefault()
-    let images = e.dataTransfer.files;
-    for(let image of images) {
-        processUploadedFiles(image);
-    }
-}
+watch(city, () => {
+    emits('city-input', city.value)
+})
 
-function processUploadedFiles(file) {
-    let reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-        let isMain = false;
-        if(uploadedFiles.value.length === 0) isMain = true;
-        uploadedFiles.value.push({src: event.target.result, isMain: isMain});
-    }
-}
+watch(postIndex, () => {
+    emits('post-index-input', postIndex.value)
+})
 
-function setMain(index) {
-    let firstElem = uploadedFiles.value[0];
-    firstElem.isMain = false;
-    uploadedFiles.value[0] = uploadedFiles.value[index];
-    uploadedFiles.value[0].isMain = true;
-    uploadedFiles.value[index] = firstElem;
-}
-
-function pushFurther(index) {
-    if(!uploadedFiles.value[index + 1]) return;
-    let indexElem = uploadedFiles.value[index];
-    if(indexElem.isMain) {
-        uploadedFiles.value[index].isMain = false;
-        uploadedFiles.value[index + 1].isMain = true;
-    }
-    uploadedFiles.value[index] = uploadedFiles.value[index + 1];
-    uploadedFiles.value[index + 1] = indexElem;
-}
-
-function pushBack(index) {
-    if(index === 0) return;
-    let indexElem = uploadedFiles.value[index];
-    if(uploadedFiles.value[index - 1].isMain) {
-        uploadedFiles.value[index].isMain = true;
-        uploadedFiles.value[index - 1].isMain = false;
-    }
-    uploadedFiles.value[index] = uploadedFiles.value[index - 1];
-    uploadedFiles.value[index - 1] = indexElem;
-}
-
-function deleteImage(index) {
-    if(!uploadedFiles.value[index]) return;
-    uploadedFiles.value.splice(index, 1);
-    if(uploadedFiles.value[0]) uploadedFiles.value[0].isMain = true;
-}
 </script>
 
-<style scoped lang="scss">
-@import '../../../public/stylesheets/properties.scss';
-@import '../../../public/stylesheets/inputs.scss';
-@import '../../../public/stylesheets/colors.scss';
-.mainStepContainer {
-    display: flex;
-    flex-direction: column;
-}
-.uploadedImages {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    max-width: 700px;
-}
-.imageInput {
-    font-size: 20px;
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-.dragArea {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    width: 500px;
-    height: 500px;
-    border: 2px dashed $active-grey;
-    margin-bottom: 40px;
-}
-
-.imagesPic {
-    width: 160px;
-    height: 160px;
-}
-
-.addContainer {
-    margin-right: 10px;
-    margin-bottom: 10px;
-    align-items: center;
-    @include space-between;
-}
-
-.inputButton {
-    @include button-style;
-    display: flex;
-    align-items: center;
+<style>
+.addressInputContainer {
+    border: .5px solid #767676;
     border-radius: 10px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-left: 20px;
-    padding-right: 20px;
-    text-decoration: none !important;
-    height: 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    text-align: center;
+}
+
+.addressLine {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 10px 10px 10px;
+}
+
+.lineInput {
+    font-size: 20px;
+    font-family: 'Proxima-Nova';
+    padding: 15px 15px 15px 15px;
+    width: 400px;
+    border: none;
+    outline: none;
+}
+
+.firstLine {
+    border-bottom: .5px #767676 solid;
 }
 </style>

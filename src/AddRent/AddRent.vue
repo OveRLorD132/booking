@@ -2,10 +2,13 @@
     <LineComponent @load-profile="loadProfile"/>
     <div class="mainContainer">
         <FirstStep v-show="step === 1" @type-chosen="setType" :rent_type="rent_type"/>
-        <SecondStep v-show="step === 2" @address-chosen="setAddress"/>
-        <ThirdStep v-show="step === 3" @files-uploaded="filesUploaded"/>
-        <FourthStep v-show="step === 4" @description-input="setDescription" @header-input="setHeader" @price-input="setPrice"/>
-        <FifthStep v-show="step === 5" :rent="rent" :user-profile="profile"/>
+        <SecondStep v-show="step === 2" @address-chosen="setAddressObject"/>
+        <ThirdStep v-show="step === 3" :address="addressObject" @address-input="setAddress" @city-input="setCity"
+          @country-input="setCountry" @post-index-input="setPostIndex"  
+        />
+        <FourthStep v-show="step === 4" @files-uploaded="filesUploaded"/>
+        <FifthStep v-show="step === 5" @description-input="setDescription" @header-input="setHeader" @price-input="setPrice"/>
+        <SixthStep v-show="step === 6" :rent="rent" :user-profile="profile"/>
     </div>
     <div class="bottomLine">
         <div class="progressLine">
@@ -13,10 +16,11 @@
             <div class="stepProgress" :style="secondStep"></div>
             <div class="stepProgress" :style="thirdStep"></div>
             <div class="stepProgress" :style="fourthStep"></div>
+            <div class="stepProgress" :style="fifthStep"></div>
         </div>
         <div class="buttons">
             <button class="lineButton backButton" @click="returnBack">Back</button>
-            <button class="lineButton nextButton" @click="nextStep">{{step === 4 ? "Complete" : "Next"}}</button>
+            <button class="lineButton nextButton" @click="nextStep">{{step === 6 ? "Complete" : "Next"}}</button>
         </div>
     </div>
 </template>
@@ -32,6 +36,7 @@ import SecondStep from './components/SecondStep.vue';
 import ThirdStep from './components/ThirdStep.vue';
 import FourthStep from './components/FourthStep.vue';
 import FifthStep from './components/FifthStep.vue';
+import SixthStep from './components/SixthStep.vue';
 
 let step = ref(1);
 
@@ -40,6 +45,13 @@ let rent = ref(null);
 let rent_type = ref(null);
 
 let profile = ref(null);
+
+let addressObject = ref(null);
+
+function setAddressObject(obj) {
+    addressObject.value = obj;
+    step.value++;
+}
 
 function loadProfile(userProfile) {
     profile.value = userProfile;
@@ -50,10 +62,22 @@ let setType = (type) => {
     console.log(rent_type);
 }
 
-let address = ref(null);
+let address = ref({});
 
-let setAddress = (addressArray) => {
-    address.value = addressArray;
+let setAddress = (addressLine) => {
+    address.value.addressLine = addressLine;
+}
+
+function setCity(city) {
+    address.value.city = city;
+}
+
+function setCountry(country) {
+    address.value.country = country;
+}
+
+function setPostIndex(postIndex) {
+    address.value.postIndex = postIndex;
 }
 
 let returnBack = () => {
@@ -94,20 +118,25 @@ let nextStep = () => {
             step.value++;
             return;
         case 2:
-            if(!address.value) return;
+            if(!addressObject.value) return;
             step.value++;
             return;
-        case 3:
+        case 3: 
+            if(!address.value.country || !address.value.addressLine) return;
+            step.value++;
+            return;
+        case 4:
             if(images.value.length < 5) return;
             step.value++;
             break;
-        case 4: 
+        case 5: 
             if(rent_type.value && address.value && images.value.length >= 5 && description.value && header.value 
             && price.value && typeof +price.value === 'number') {
                 setRent(rent_type.value, address.value, images.value, description.value, header.value, price.value);
                 step.value++;
             }
-        case 5:
+            return;
+        case 6:
             try {
                 axios.post('/new-rent', {rent: rent.value, user: {id: profile.value.id, name: profile.value.first_name}}).then(({data}) => {
                     window.location.href = `/booking/rent/${data}`;
@@ -151,6 +180,12 @@ let thirdStep = computed(() => {
 let fourthStep = computed(() => {
     return {
         backgroundColor: step.value >= 5 ? "black" : "#ADADAD"
+    }
+})
+
+let fifthStep = computed(() => {
+    return {
+        backgroundColor: step.value >= 6 ? "black" : "#ADADAD"
     }
 })
 </script>
