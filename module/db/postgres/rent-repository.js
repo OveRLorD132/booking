@@ -51,4 +51,20 @@ export default class RentRepostitory {
         }
         return result;
     }
+    getWish(id) {
+        return new Promise((resolve, reject) => {
+            this.client.query(`SELECT id AS id, user_name, header, price, user_id FROM rental_properties WHERE id = $1`, [id], (err, result) => {
+                console.log(result);
+                if(err) reject(err);
+                else resolve(result.rows[0]);
+            })
+        })
+    }
+    async getShortWishlist(wishlist) {
+        let wishArray = [];
+        for(let wish of wishlist) {
+            wishArray.push(await this.getWish(wish));
+        }
+        return wishArray;
+    }
 }

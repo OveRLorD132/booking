@@ -50,6 +50,7 @@ function emitAccountChange(obj) {
 function onRemoveWish(id) {
   emits('remove-wish', id);
 } 
+
 </script>
 
 <style lang="scss">

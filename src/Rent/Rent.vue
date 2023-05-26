@@ -1,5 +1,5 @@
 <template>
-    <LineComponent @load-profile="loadProfile"/>
+    <UpperLine @user-profile="loadProfile"/>
     <Transition name="show-all-images">
         <AllImages :directory="directory" :imagesCount="rent.images_count" 
           @hide-dialog="hideAllImages" v-if="rent && allImagesIsVisible"
@@ -7,6 +7,7 @@
     </Transition>
     
     <div class="mainContainer" v-if="rent">
+        <title>{{ rent.header }}</title>
         <div class="rentContainer">
             <div class="rentTitle">
                 <h1>
@@ -41,6 +42,7 @@
                     </div>
                 </div>
             </div>
+            <MapComponent v-if="rent.address.coords" :coords="rent.address.coords"/>
         </div>
     </div>
 </template>
@@ -51,12 +53,13 @@ import { ref, onMounted } from 'vue';
 import io from 'socket.io-client';
 let socket = io();
 import AllImages from './components/AllImages.vue';
-import LineComponent from '../components/LineComponent.vue';
 import CommentInput from './components/CommentInput.vue';
 import CommentComponent from './components/CommentComponent.vue';
 import ImagesComponent from './components/ImagesComponent.vue';
 
 import Comment from './module/Comment';
+import UpperLine from '../Profile/components/UpperLine.vue';
+import MapComponent from './components/MapComponent.vue';
 
 let rent = ref(null);
 let user = ref(null);

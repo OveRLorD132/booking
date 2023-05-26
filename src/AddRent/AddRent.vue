@@ -1,10 +1,10 @@
 <template>
-    <LineComponent @load-profile="loadProfile"/>
+    <UpperLine @user-profile="loadProfile"/>
     <div class="mainContainer">
         <FirstStep v-show="step === 1" @type-chosen="setType" :rent_type="rent_type"/>
         <SecondStep v-show="step === 2" @address-chosen="setAddressObject"/>
         <ThirdStep v-show="step === 3" :address="addressObject" @address-input="setAddress" @city-input="setCity"
-          @country-input="setCountry" @post-index-input="setPostIndex"  
+          @country-input="setCountry" @post-index-input="setPostIndex" @coords-input="setCoords"
         />
         <FourthStep v-show="step === 4" @files-uploaded="filesUploaded"/>
         <FifthStep v-show="step === 5" @description-input="setDescription" @header-input="setHeader" @price-input="setPrice"/>
@@ -29,7 +29,7 @@
 import axios from 'axios';
 
 import { computed, ref } from 'vue';
-import LineComponent from '../components/LineComponent.vue';
+import UpperLine from '../Profile/components/UpperLine.vue';
 
 import FirstStep from './components/FirstStep.vue'; 
 import SecondStep from './components/SecondStep.vue';
@@ -78,6 +78,10 @@ function setCountry(country) {
 
 function setPostIndex(postIndex) {
     address.value.postIndex = postIndex;
+}
+
+function setCoords(coords) {
+    address.value.coords = coords;
 }
 
 let returnBack = () => {
@@ -198,10 +202,9 @@ let fifthStep = computed(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: calc(100vh - 125px);
     width: 100%;
-    margin-bottom: 75px;
-    margin-top: 50px;
+    margin-bottom: 80px;
+    margin-top: 70px;
 } 
 
 .bottomLine {

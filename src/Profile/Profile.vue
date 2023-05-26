@@ -1,7 +1,7 @@
 <template>
     <FlashMessages :messages="messages"/>
     <div class="mainContainer">
-        <UpperLine @user-profile="setProfile"/>
+        <UpperLine @user-profile="setProfile" @wish-deleted="onRemoveWish"/>
         <div class="profileContainer" v-if="profile">
             <div class="profileLeftContainer">
                 <div class="profileEdit">
@@ -30,7 +30,9 @@
                     <div class="logoutButton">Delete My Account</div>
                 </div>
             </div>
-            <ProfileRight :profile="profile" @profile-change="commitChanges" @account-change="commitChanges" @remove-wish="onRemoveWish"/>
+            <ProfileRight :profile="profile" @profile-change="commitChanges" 
+              @account-change="commitChanges" @remove-wish="onRemoveWish" ref="profileRight"
+            />
         </div>
     </div>
 </template>
@@ -46,6 +48,8 @@ import axios from 'axios';
 let profile = ref(null);
 
 let messages = ref(null);
+
+let profileRight = ref(null);
 
 function setProfile(user) {
     profile.value = user;

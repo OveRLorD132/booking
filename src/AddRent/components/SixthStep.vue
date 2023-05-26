@@ -4,15 +4,14 @@
         <h2>{{ rent.header }}</h2>
         <div class="addressLabel">{{ rent.address.addressLine }}</div>
         <div class="imagesContainer">
-            <img :src="rent.images[0].src" class="rentImage mainImage"/>
-            <div class="otherImagesContainer">
-                <template v-for="(image, index) in rent.images">
-                    <img  class="rentImage otherImages" v-if="!image.isMain"
-                      :style="{ marginRight: index % 2 === 1 ? '10px' : '0'}" :src="image.src"
-                    />
-                </template>
-            </div>
-
+            <img :src="rent.images[0].src" class="rentImage" 
+              :style="{gridColumn: '1 / 2', gridRow: '1 / 2', width: '410px', height: '410px'}" 
+            />
+            <template v-for="(image, index) in rent.images">
+                <img class="rentImage" v-if="!image.isMain"
+                    :style="{gridColumn: index === 1 || index === 3 ? '3 / 3' : '', width: '200px', height: '200px'}" 
+                    :src="image.src" />
+            </template>
         </div>
         <div class="type">{{ rent.type }}, rent by {{ userProfile.first_name }}</div>
         <div class="rentAbout">
@@ -28,6 +27,7 @@
 
 <script setup>
 
+
 let props = defineProps({
     rent: Object,
     userProfile: Object
@@ -38,10 +38,11 @@ let props = defineProps({
 <style scoped lang="scss">
 @import '../../../public/stylesheets/colors.scss';
 .imagesContainer {
-    display: flex;
-    flex-direction: row;
-    max-width: 830px;
-    max-height: 400px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(200px, 1fr));
+    grid-auto-rows: 200px;
+    gap: 10px;
+    width: 800px;
 }
 
 .otherImagesContainer {
@@ -52,18 +53,6 @@ let props = defineProps({
 .rentImage {
     object-position: center;
     object-fit: cover;
-    margin-bottom: 10px;
-}
-
-.otherImages {
-    width: 200px;
-    height: 200px;
-}
-
-.mainImage {
-    margin-right: 10px;
-    width: 410px;
-    height: 410px;
 }
 
 .type {

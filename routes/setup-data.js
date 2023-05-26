@@ -16,7 +16,22 @@ router.get('/flash-messages', async(req, res) => {
 })
 
 router.get('/load-wishlist', async(req, res) => {
+    if(!req.user) {
+        res.status(500);
+        res.send('Error');
+        return;
+    } 
     let result = await rentRepository.getWishlist(req.user.wishlist);
+    res.send(result);
+})
+
+router.get('/short-wishlist', async(req, res) => {
+    if(!req.user) {
+        res.status(500);
+        res.send('Error');
+        return;
+    } 
+    let result = await rentRepository.getShortWishlist(req.user.wishlist);
     res.send(result);
 })
 

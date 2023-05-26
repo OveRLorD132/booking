@@ -121,6 +121,7 @@ async function saveChanges() {
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+  width: 800px;
 }
 
 .propertyContainer {

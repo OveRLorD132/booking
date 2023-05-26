@@ -31,6 +31,10 @@ router.patch('/booking/to-wish', async(req, res) => {
 })
 
 router.patch('/booking/remove-wish', async(req, res) => {
+    if(!req.user || req.body.user_id !== req.user.id) {
+        res.status(500);
+        res.send('Error')
+    }
     try {
         let response = await userRepository.removeFromWishlist(req.body.id, req.body.user_id);
         console.log(response);
