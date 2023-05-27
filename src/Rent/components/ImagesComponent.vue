@@ -1,12 +1,8 @@
 <template>
     <div class="imagesContainer">
-        <ImageComponent :name="'Main'" :image="`${directory}Main.png`" @image-chosen="setChosenImage"/>
-        <div class="sideImagesContainer">
-            <ImageComponent v-for="num in 4" 
-              :image="`${directory + num}.png`" 
-              :name="num" @image-chosen="showAllImages"
-            />
-        </div>
+        <ImageComponent v-for="(image, index) of images" :image="image" :index="index"
+          @image-chosen="showAllImages" 
+        />
     </div>
 </template>
 
@@ -15,8 +11,7 @@
 import ImageComponent from './ImageComponent.vue';
 
 let props = defineProps({
-    directory: String,
-    imagesCount: Number,
+    images: Array,
 })
 
 </script>
@@ -40,26 +35,28 @@ let props = defineProps({
     min-height: 420px;
     max-width: 840px;
     margin-top: 10px;
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    align-content: center;
     align-items: center;
+    grid-template-columns: repeat(4, 200px);
+    gap: 10px;
 }
+
 .sideImagesContainer {
     align-self: flex-start;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
 }
+
 .rentImage {
     border-radius: 10px;
     cursor: pointer;
     object-position: center;
     object-fit: cover;
-    margin-bottom: 10px;
-    margin-right: 10px;
 }
+
 .mainImage {
-    margin-right: 10px;
     width: 410px;
     height: 410px;
 }
@@ -121,5 +118,4 @@ let props = defineProps({
     @include galleryButtons;
     left: 10px;
 }
-
 </style>

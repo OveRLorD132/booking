@@ -1,13 +1,12 @@
 import { Router } from "express";
 
-import RentRepostitory from "../module/db/postgres/rent-repository.js";
+import Rent from "../module/db/postgres/Rent.js";
 
-let rentRepository = new RentRepostitory();
+let rent = new Rent();
 
 let router = Router();
 
 router.get('/booking/user-profile', async(req, res) => {
-    console.log(req);
     res.send(req.user);
 })
 
@@ -21,7 +20,7 @@ router.get('/load-wishlist', async(req, res) => {
         res.send('Error');
         return;
     } 
-    let result = await rentRepository.getWishlist(req.user.wishlist);
+    let result = await rent.getWishlist(req.user.wishlist);
     res.send(result);
 })
 
@@ -31,7 +30,7 @@ router.get('/short-wishlist', async(req, res) => {
         res.send('Error');
         return;
     } 
-    let result = await rentRepository.getShortWishlist(req.user.wishlist);
+    let result = await rent.getShortWishlist(req.user.wishlist);
     res.send(result);
 })
 

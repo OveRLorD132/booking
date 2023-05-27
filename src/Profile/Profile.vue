@@ -146,7 +146,7 @@ function onRemoveWish(id) {
 
 .logoutButton {
   @include profile-buttons;
-  background-color: #86E9CE;
+  background-color: $button-blue;
 }
 
 .logoutContainer {

@@ -1,23 +1,26 @@
 <template>
     <div class="dialog">
         <Transition name="full-image-show">
-            <div class="fullImageCont" v-if="chosenImage">
+            <div class="fullImageCont" v-if="chosenImage !== undefined">
                 <img class="closeButton" src="/images/close.png" @click="hideImage"/>
                 <img class="galleryButton galleryNext" src="/images/gallery-next.png" 
-                  @click="galleryNext" v-if="chosenImage !== (directory + imagesCount + '.png')"
+                  @click="galleryNext" v-if="chosenImage !== images.length - 1"
                 />
                 <img class="galleryButton galleryBack" src="/images/gallery-next.png"
-                  @click="galleryBack" v-if="chosenImage !== (directory + 'Main.png')"
+                  @click="galleryBack" v-if="chosenImage !== 0"
                 />
-                <img class="fullImage" :src="chosenImage"/>
+                <img class="fullImage" :src="images[chosenImage]"/>
             </div>
         </Transition>
 
         <div class="interfaceCont">
             <img class="returnImage" src="/images/return.png" @click="hideAllImages"/>
             <div class="imagesCont">
-                <GalleryImage :image="directory + 'Main.png'" @image-choose="onImageChoose"/>
-                <GalleryImage v-for="num in imagesCount" :image="directory + num + '.png'" @image-choose="onImageChoose"/>
+                <GalleryImage v-for="(image, index) of images"
+                 :image="image" :index="index" @image-choose="onImageChoose" :is-editing="isEditing" 
+                 :length="images.length" @set-main="setMain" @delete-image="deleteImage" 
+                 @push-back="pushBack" @push-further="pushFurther"
+                />
             </div>
         </div>
     </div>
@@ -26,44 +29,41 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 import GalleryImage from './GalleryImage.vue';
 let props = defineProps({
-    directory: String,
-    imagesCount: Number
+    images: Array,
+    isEditing: Boolean
 })
 
 let emits = defineEmits({
-    'hide-dialog': null
+    'hide-dialog': null,
+    'set-main': (index) => typeof index === 'number',
+    'push-further': (index) => typeof index === 'number',
+    'push-back': (index) => typeof index === 'number',
+    'delete-image': (index) => typeof index === 'number',
 })
 
-let chosenImage = ref(null);
+let chosenImage = ref(undefined);
 
-function onImageChoose(source) {
-    chosenImage.value = source;
+function onImageChoose(index) {
+    console.log(index);
+    chosenImage.value = index;
 }
 
 function hideImage() {
-    chosenImage.value = null;
+    chosenImage.value = undefined;
 }
 
 function galleryBack() {
-    let imageNumber = findImageNumber(chosenImage.value);
-    if(imageNumber == 1) {
-        imageNumber = 'Main.png';
-        chosenImage.value = props.directory + imageNumber;
-        return;
-    } else chosenImage.value = props.directory + --imageNumber + '.png';
+    if(chosenImage.value < 1) return;
+    chosenImage.value--; 
 }
 
 function galleryNext() {
-    let imageNumber = findImageNumber(chosenImage.value);
-    if(imageNumber == 'Main') {
-        imageNumber = 1;
-        chosenImage.value = props.directory + imageNumber + '.png';
-        return;
-    } else chosenImage.value = props.directory + ++imageNumber + '.png';
+    if(chosenImage.value > props.images.length - 2) return;
+    chosenImage.value++;
 }
 
 function findImageNumber(path) {
@@ -72,6 +72,22 @@ function findImageNumber(path) {
 
 function hideAllImages() {
     emits('hide-dialog');
+}
+
+function setMain(index) {
+    emits('set-main', index);
+} 
+
+function pushFurther(index) {
+    emits('push-further', index);
+}
+
+function pushBack(index) {
+    emits('push-back', index);
+}
+
+function deleteImage(index) {
+    emits('delete-image', index);
 }
 </script>
 

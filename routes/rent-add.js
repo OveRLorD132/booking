@@ -2,9 +2,9 @@ import { Router } from "express";
 
 let router = Router();
 
-import RentRepostitory from "../module/db/postgres/rent-repository.js";
+import Rent from "../module/db/postgres/Rent.js";
 
-let rentRepository = new RentRepostitory();
+let rent = new Rent();
 
 import StaticPhotos from "../module/serve-static/rent-photos.js";
 
@@ -14,6 +14,18 @@ router.get('/become-a-host', (req, res) => {
     res.render('AddRent');
 })
 
+router.get('/load-photos', async(req, res) => {
+    try {
+        let photos = await staticPhotos.getPhotos(req.query.id);
+        res.status(200);
+        res.send(photos);
+    } catch(err) {
+        console.error(err);
+        res.status(500);
+        res.send('Error');
+    }
+})
+
 router.post('/new-rent', async(req, res) => {
     if(req.user && req.body.user.id === req.user.id) {
         let photos = req.body.rent.images;
@@ -21,14 +33,10 @@ router.post('/new-rent', async(req, res) => {
         let user_id = req.body.user.id;
         let user_name = req.body.user.name;
         address = JSON.stringify(address);
-        let id = await rentRepository.addRent({  address, description, type, header, price, user_id, user_name, images_count: photos.length-1 });
-        let filename;
+        let id = await rent.addRent({  address, description, type, header, price, user_id, user_name, images_count: photos.length-1 });
         for(let i = 0; i < photos.length; i++) {
             let photo = photos[i];
-            let directoryInfo = {rent_id: id, user_name: user_name, user_id: user_id};
-            if(photo.isMain) filename = 'Main.png';
-            else filename = `${i}.png`;
-            await  staticPhotos.addPhoto(photo.src, filename, directoryInfo);
+            await staticPhotos.addPhoto(photo.src, `${i}.png`, id.id);
         }
         res.status(200);
         res.send(id.id);

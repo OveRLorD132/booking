@@ -1,7 +1,10 @@
 <template>
-    <div class="imageContainer" @click="setChosenImage">
+    <div class="imageContainer" @click="setChosenImage"          
+      :style="{gridColumn: index === 0 ? '1 / 3' : '', gridRow: index === 0 ?  '1 / 3' : ''}"
+    >
         <img :src="image" class="rentImage" @click="showImage" 
-          :class=" name === 'Main' ? 'mainImage' : 'subImage'"
+          :class=" index === 0 ? 'mainImage' : 'subImage'"
+
         />
     </div>
 </template>
@@ -11,7 +14,7 @@ import { ref } from 'vue';
 
 let props = defineProps({
     image: null,
-    name: Number
+    index: Number
 })
 
 let emits = defineEmits({
@@ -24,5 +27,4 @@ function setChosenImage() {
 </script>
 
 <style lang="scss">
-
 </style>

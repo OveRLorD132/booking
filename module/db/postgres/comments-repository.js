@@ -2,9 +2,9 @@ import pgk from 'pg';
 
 let { Client } = pgk;
 
-import RentRepository from './rent-repository.js';
+import Rent from './Rent.js';
 
-let rentRepository = new RentRepository();
+let rent = new Rent();
 
 export default class CommentsRepository {
     constructor() {
@@ -12,6 +12,7 @@ export default class CommentsRepository {
         this.client.connect();
     }
     addComment(obj) {
+        delete obj.first_name;
         let keys = Object.keys(obj);
         let values = Object.values(obj);
         let placeholders = values.map((_, index) => `$${index + 1}`).join(", ");
@@ -19,10 +20,8 @@ export default class CommentsRepository {
         return new Promise((resolve, reject) => {
             this.client.query(query, values, async (err, result) => {
                 if(err) reject(err);
-                let rating = await this.getRentRating(obj.rent_id)
-                await rentRepository.calculateRating(rating, obj.rent_id);
                 let comment = result.rows[0];
-                resolve({comment, rating});
+                resolve(comment);
             })
         })
     }
@@ -47,7 +46,7 @@ export default class CommentsRepository {
             this.client.query(`UPDATE comments SET text = $1, rating = $3 WHERE id = $2`, [text, id, rating], async (err, result) => {
                 if(err) reject(err);
                 let rating = await this.getRentRating(rent_id);
-                await rentRepository.calculateRating(rating, rent_id);
+                await rent.calculateRating(rating, rent_id);
                 resolve(rating);
             })
         })
@@ -57,7 +56,7 @@ export default class CommentsRepository {
             this.client.query(`DELETE FROM comments WHERE id = $1`, [id], async (err, result) => {
                 if(err) reject(err);
                 let rating = await this.getRentRating(rent_id);
-                await rentRepository.calculateRating(rating, rent_id);
+                await rent.calculateRating(rating, rent_id);
                 resolve(rating);
             })
         })
