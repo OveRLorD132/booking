@@ -70,7 +70,7 @@ document.addEventListener('click', (event) => {
 
 <style lang="scss">
 .lineMainContainer {
-    position: fixed;
+    position: sticky;
     z-index: 1;
     width: 100%;
     top:0;
@@ -85,7 +85,7 @@ document.addEventListener('click', (event) => {
     justify-content: space-between;
     font-size: 20px;
     padding: 15px 15px 15px 15px;
-    border-bottom: .5px solid #767676;
+    border-bottom: .5px solid #d1d1d1;
 }
 
 .rightSide {

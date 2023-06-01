@@ -9,6 +9,7 @@ let stat = promisify(fs.stat);
 let mkdir = promisify(fs.mkdir);
 let readdir = promisify(fs.readdir);
 let readfile = promisify(fs.readFile);
+let unlink = promisify(fs.unlink);
 
 export default class StaticPhotos {
   constructor() {
@@ -50,6 +51,14 @@ export default class StaticPhotos {
       return files;
     } catch (err) {
       console.error(err);
+    }
+  }
+  async changePhotos(images, id) {
+    for(let file of await readdir(path.resolve(this.directory, id))) {
+      await unlink(path.resolve(this.directory, id, file));
+    }
+    for(let i = 0; i < images.length; i++) {
+      await this.addPhoto(images[i], `${i}.png`, id)
     }
   }
 }

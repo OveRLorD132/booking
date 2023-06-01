@@ -3,11 +3,11 @@
     <template v-if="shortWishlist.length > 0">
       <div class="wish" v-for="(rent, index) in shortWishlist" @mouseover="showDelete(rent)" @mouseleave="hideDelete">
         <div class="wishLeft">
-          <img class="wishImage" :src="`/rent-photos/${rent.user_name + rent.user_id}/${rent.id}/Main.png`" />
+          <img class="wishImage" :src="`/rent-photos/${rent.id}/0.png`" />
         </div>
         <div class="wishRight">
           <div class=wishTitle><a class="wishLink" :href="`/booking/rent/${rent.id}`">{{ rent.header }}</a></div>
-          <div class="wishHost">Rent by {{ rent.user_name }}</div>
+          <div class="wishHost">Rent by {{ rent.first_name}}</div>
           <div class="wishPrice">{{ rent.price }}$ per day</div>
         </div>
         <div class="wishDeleteCont" v-show="hoveredWish === rent" @click="deleteWish(rent, index)">
@@ -34,6 +34,7 @@ let emits = defineEmits({
 let shortWishlist = ref([]);
 
 axios.get('/short-wishlist').then(({ data }) => {
+  console.log(data);
   shortWishlist.value = data;
 })
 

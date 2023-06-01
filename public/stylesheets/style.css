@@ -1,5 +1,5 @@
 body {
-  font-family: 'Proxima-Nova';
+  font-family: 'Roboto';
   padding: 0;
   margin: 0;
 }
@@ -9,6 +9,15 @@ body {
   src: url('/fonts/proxima_nova_reg.ttf');
 }
 
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto-Regular.ttf');
+}
+
 a {
   color: #00B7FF;
+}
+
+.hide-html-overflow {
+  overflow-y: hidden;
 }

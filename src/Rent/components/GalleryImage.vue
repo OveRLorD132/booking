@@ -5,7 +5,7 @@
           @click="showFullImage"
         />
         <img class="edit-btn" src="/images/more.png" v-if="isHovered" @click="showPanel"/>
-        <div class="panel-cont" v-if="panelIsVisible">
+        <div class="panel-cont" v-if="panelIsVisible && isHovered">
             <div class="panel-elem" v-if="index" @click="setMain">Set Main</div>
             <div class="panel-elem" v-if="index !== (length - 1)" @click="pushFurther">Push Further</div>
             <div class="panel-elem" v-if="index" @click="pushBack">Push Back</div>
@@ -56,18 +56,22 @@ function showPanel() {
 
 function setMain() {
     emits('set-main', props.index);
+    panelIsVisible.value = false;
 }
 
 function pushFurther() {
     emits('push-further', props.index);
+    panelIsVisible.value = false;
 }
 
 function pushBack() {
     emits('push-back', props.index);
+    panelIsVisible.value = false;
 }
 
 function deleteImage() {
     emits('delete-image', props.index);
+    panelIsVisible.value = false;
 }
 </script>
 
@@ -101,7 +105,16 @@ function deleteImage() {
     right: 10px;
     top: 50px;
     background-color: #ffffff;
-    padding: 10px 10px 10px 10px;
+    padding: 10px 0 10px 0;
     border-radius: 10px;
+}
+
+.panel-elem {
+    padding: 5px 10px 5px 10px;
+    cursor: pointer;
+}
+
+.panel-elem:hover {
+    background-color: #f0f0f0;
 }
 </style>

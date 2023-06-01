@@ -31,9 +31,8 @@ router.post('/new-rent', async(req, res) => {
         let photos = req.body.rent.images;
         let { address, description, type, header, price } = req.body.rent;
         let user_id = req.body.user.id;
-        let user_name = req.body.user.name;
         address = JSON.stringify(address);
-        let id = await rent.addRent({  address, description, type, header, price, user_id, user_name, images_count: photos.length-1 });
+        let id = await rent.addRent({  address, description, type, header, price, user_id });
         for(let i = 0; i < photos.length; i++) {
             let photo = photos[i];
             await staticPhotos.addPhoto(photo.src, `${i}.png`, id.id);

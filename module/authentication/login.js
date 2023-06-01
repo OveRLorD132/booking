@@ -1,4 +1,4 @@
-import UserRepostitory from "../db/postgres/user-repository.js";
+import UserRepostitory from "../db/postgres/Users.js";
 
 let userRepostitory = new UserRepostitory();
 

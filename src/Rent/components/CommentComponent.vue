@@ -11,7 +11,6 @@
                 <div v-show="isHovered" @click="showEditingForm">
                     <img class="commentButtons" src="/images/edit.png"/>
                 </div>
-                <div class="rating" v-if="!isEditing">{{ comment.rating }}</div>
                 <div v-if="isEditing"><input class="ratingInput" type="text" v-model="editedRating" /></div>
                 <div v-show="isHovered" @click="deleteComment">
                     <img class="commentButtons" src="/images/delete.png"/>
@@ -71,12 +70,12 @@ let showEditingForm = () => {
 
 let editText = () => {
     if(props.comment.text === editedComment.value && props.comment.rating === editedRating.value) return;
-    props.comment.emitEditing(props.socket, editedComment.value, props.comment.id, editedRating.value, props.rent.id);
+    props.comment.emitEditing(props.socket, editedComment.value, props.comment.id, editedRating.value);
     isEditing.value = false;
 }
 
 let deleteComment = () => {
-    props.comment.emitDeleting(props.socket, props.comment.id, props.index, props.rent.id);
+    props.comment.emitDeleting(props.socket, props.comment.id, props.index);
 }
 </script>
 
@@ -95,8 +94,8 @@ let deleteComment = () => {
     margin: 10px 10px 10px 10px;
 }
 .commentProfileImg {
-    width: 25px;
-    height: 25px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
 }
 
@@ -110,6 +109,8 @@ let deleteComment = () => {
 
 .username {
     margin-left: 5px;
+    font-size: 18px;
+    font-weight: 500;
 }
 
 .rating {
@@ -140,7 +141,9 @@ let deleteComment = () => {
 }
 
 .commentText {
-    margin-top: 10px;
+    overflow-wrap: break-word;
+    margin: 10px 10px 10px 5px;
+    font-size: 16px;
 }
 
 .changeButton {

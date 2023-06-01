@@ -1,7 +1,7 @@
 @import './colors.scss';
 
 .mainInput {
-    font-family: 'Proxima-Nova';
+    font-family: 'Roboto';
     outline: none;
     border-radius: 5px;
     border: none;
@@ -21,7 +21,7 @@
 @mixin profile-buttons {
     cursor: pointer;
     border-radius: 15px;
-    font-family: 'Proxima-Nova';
+    font-family: 'Roboto';
     color: #ffffff;
     border: none;
     padding: 15px 15px 15px 15px;

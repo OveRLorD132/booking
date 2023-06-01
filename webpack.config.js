@@ -4,7 +4,7 @@ import path from 'path';
 
 export default {
     mode: 'development',
-    entry: './src/Rent/rent.js',
+    entry: './src/Main/main.js',
     cache: {
         type: 'filesystem',
         allowCollectingMemory: true,
@@ -15,8 +15,8 @@ export default {
         splitChunks: false,
     },
     output: {
-        path: path.resolve(__dirname, 'public', 'javascripts', 'Rent'),
-        filename: 'rent.js',
+        path: path.resolve(__dirname, 'public', 'javascripts', 'Main'),
+        filename: 'main.js',
         clean: true,
     },
     module: {

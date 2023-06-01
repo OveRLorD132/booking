@@ -64,7 +64,9 @@ export default class Rent {
   getWish(id) {
     return new Promise((resolve, reject) => {
       this.client.query(
-        `SELECT id AS id, user_name, header, price, user_id FROM rental_properties WHERE id = $1`,
+        `SELECT rental_properties.*, users.first_name FROM rental_properties 
+        INNER JOIN users ON rental_properties.user_id = users.id
+        WHERE rental_properties.id = $1`,
         [id],
         (err, result) => {
           console.log(result);
@@ -80,5 +82,77 @@ export default class Rent {
       wishArray.push(await this.getWish(wish));
     }
     return wishArray;
+  }
+  getRentUser(id) {
+    return new Promise((resolve, reject) => {
+      this.client.query(
+        `SELECT user_id FROM rental_properties WHERE id = $1`,
+        [id],
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result.rows[0]);
+        }
+      );
+    });
+  }
+  changeRentProperty(propertyName, propertyValue, id) {
+    return new Promise((resolve, reject) => {
+      this.client.query(
+        `UPDATE rental_properties SET ${propertyName} = $1 WHERE id = $2`,
+        [propertyValue, id],
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(propertyValue);
+        }
+      );
+    });
+  }
+  changeAddressLine(id, addressLine) {
+    return new Promise((resolve, reject) => {
+      this.client.query(
+        `SELECT address FROM rental_properties WHERE id = $1`,
+        [id],
+        (err, result) => {
+          if (err) reject(err);
+          else {
+            let address = result.rows[0].address;
+            address = JSON.parse(address);
+            address.addressLine = addressLine;
+            this.client.query(
+              `UPDATE rental_properties SET address = $1 WHERE id = $2`,
+              [address, id],
+              (err, result) => {
+                if (err) reject(err);
+                else resolve(addressLine);
+              }
+            );
+          }
+        }
+      );
+    });
+  }
+  changeCoords(coords, id) {
+    return new Promise((resolve, reject) => {
+      this.client.query(
+        `SELECT address FROM rental_properties WHERE id = $1`,
+        [id],
+        (err, result) => {
+          if (err) reject(err);
+          else {
+            let address = result.rows[0].address;
+            address = JSON.parse(address);
+            address.coords = coords;
+            this.client.query(
+              `UPDATE rental_properties SET address = $1 WHERE id = $2`,
+              [address, id],
+              (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+              }
+            );
+          }
+        }
+      );
+    });
   }
 }

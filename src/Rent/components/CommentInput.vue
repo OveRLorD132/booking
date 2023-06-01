@@ -68,7 +68,6 @@ let addComment = () => {
         text: newComment.value,
         user_id: props.user.id,
         rating: rating.value ? rating.value : 5,
-        first_name: props.user.first_name
     });
 }
 </script>

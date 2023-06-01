@@ -1,7 +1,7 @@
 import express from 'express';
 let router = express.Router();
 
-import UserRepostitory from '../module/db/postgres/user-repository.js';
+import UserRepostitory from '../module/db/postgres/Users.js';
 let userRepository = new UserRepostitory();
 
 router.get('/', (req, res) => {

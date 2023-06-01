@@ -4,6 +4,10 @@ import Rent from "../module/db/postgres/Rent.js";
 
 let rent = new Rent();
 
+import StaticPhotos from "../module/serve-static/rent-photos.js";
+
+let staticPhotos = new StaticPhotos();
+ 
 let router = Router();
 
 router.get('/booking/user-profile', async(req, res) => {
@@ -12,6 +16,11 @@ router.get('/booking/user-profile', async(req, res) => {
 
 router.get('/flash-messages', async(req, res) => {
     res.send(req.flash());
+})
+
+router.get('/photos-count/:id', async(req, res) => {
+    let photos = await staticPhotos.getPhotos(req.params.id);
+    res.send(String(photos.length));
 })
 
 router.get('/load-wishlist', async(req, res) => {

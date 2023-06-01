@@ -1,7 +1,18 @@
 <template>
-    <LineComponent @load-profile="loadProfile"/>
+    <UpperLine @user-profile="loadProfile"/>
+    <div class="filter-line">
+            <div class="filter-component" v-for="component of filterComponents" 
+              :style="{ borderBottomColor: component === chosenFilter ? 'black' 
+              : component === hoveredComponent ? '#d1d1d1' : '#ffffff'}" 
+              @mouseover="componentHover(component)" @mouseleave="componentLeave"
+              @click="chooseFilter(component)"
+            >
+                <img class="component-image" :src="`/images/${component.toLowerCase()}.png`"/>
+                <div class="component-text">{{ component }}</div>
+            </div>
+        </div>
     <div class="mainContainer">
-        <RentComponent v-for="rent in rentList" @to-wish="onToWish" @remove-wish="onRemoveWish" :rent="rent" :key="rent.id" :user="user"/> 
+        <RentComponent v-for="rent in filteredRent" @to-wish="onToWish" @remove-wish="onRemoveWish" :rent="rent" :key="rent.id" :user="user"/> 
     </div>
 </template>
 
@@ -11,11 +22,13 @@ import axios from 'axios';
 let socket = io();
 import Rent from './module/Rent';
 import RentComponent from '../components/RentComponent.vue';
-import LineComponent from '../components/LineComponent.vue';
+import UpperLine from '../Profile/components/UpperLine.vue';
 
 import { ref } from 'vue';
 
 socket = ref(socket);
+
+let filterComponents = ref(['Apartments', 'House', 'Room', 'Villa', 'Penthouse', 'Duplex', 'Guesthouse']);
 
 let user = ref(null);
 
@@ -25,12 +38,14 @@ let loadProfile = (userObj) => {
 
 let rentList = ref([]);
 
+let filteredRent = ref([]);
+
 socket.value.on('load-list', (list) => {
     for(let rent of list) {
         rent = new Rent(rent);
         rentList.value.push(rent);
+        filteredRent.value.push(rent);
     }
-    console.log(rentList);
 })
 
 async function onToWish(id) {
@@ -55,14 +70,64 @@ async function onRemoveWish(id) {
         console.error(err);
     }
 }
+
+let hoveredComponent = ref(null);
+
+function componentHover(component) {
+    hoveredComponent.value = component;
+}
+
+function componentLeave() {
+    hoveredComponent.value = null;
+}
+
+let chosenFilter = ref(null);
+
+function chooseFilter(component) {
+    if(component !== chosenFilter.value){
+        filteredRent.value = rentList.value.filter((rent) => rent.type === component)
+        chosenFilter.value = component;
+    } 
+    else {
+        filteredRent.value = rentList.value;
+        chosenFilter.value = null;
+    }
+}
 </script>
 
 <style scoped lang="scss"> 
 .mainContainer {
-    padding-top: 70px;
+    padding-top: 90px;
     display: flex;
     justify-content: center;
     flex-direction: row;
     flex-wrap: wrap;
 }
+
+.filter-line {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 30px 10px 10px 10px;
+}
+
+.filter-component {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-bottom: 0.5px #ffffff solid;
+}
+
+.component-image {
+    width: 40px;
+    height: 40px;
+}
+
+.component-text {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+//#d1d1d1
 </style>

@@ -105,6 +105,7 @@ function deleteImage(index) {
     uploadedFiles.value.splice(index, 1);
     if(uploadedFiles.value[0]) uploadedFiles.value[0].isMain = true;
 }
+
 </script>
 
 <style scoped lang="scss">

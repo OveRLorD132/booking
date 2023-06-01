@@ -1,8 +1,8 @@
 <template>
     <div class="imagesContainer">
-        <ImageComponent v-for="(image, index) of images" :image="image" :index="index"
-          @image-chosen="showAllImages" 
-        />
+        <template v-for="(image, index) of images">
+            <ImageComponent :image="image" :index="index" v-if="index < 5" @image-chosen="showAllImages" />
+        </template>
     </div>
 </template>
 

@@ -1,9 +1,8 @@
-import { query } from "express";
 import pgk from "pg";
 
 let { Client } = pgk;
 
-export default class UserRepostitory {
+export default class Users{
     constructor() {
         this.client = new Client({user: 'postgres', password: 'password', database: 'booking'})
         this.client.connect();
@@ -12,7 +11,6 @@ export default class UserRepostitory {
         return new Promise((resolve, reject) => {
             this.client.query(`SELECT * FROM users WHERE id = $1`, [id], (err, result) => {
                 if(err) reject(err);
-                console.log(result);
                 resolve(result.rows[0]);
             })
         })

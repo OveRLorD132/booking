@@ -7,14 +7,13 @@
             <img src="/images/wished.png" class="wishListButton" 
               v-if="user && user.wishlist && user.wishlist.includes(+rent.id)" @click="removeFromWishlist"
             />
-            <img src="/images/imgButton.png" class="next" v-if="page < rent.images_count" @click.stop="nextPage"/>
+            <img src="/images/imgButton.png" class="next" v-if="page < images_count - 1" @click.stop="nextPage"/>
             <img src="/images/imgButton.png" class="back" v-if="page > 0" @click.stop="back"/>
         </div>
         <a class="rentLink" :href="rentLink">
             <div class="imagesContainer" :style="{transform: `translateX(${-page * 250}px)`}">
-                <div class="rentImageContainer"><img class="rentImage" :src="directory + 'Main.png'"/></div>
-                <div class="rentImageContainer" v-for="num in rent.images_count">
-                    <img class="rentImage" :src="directory + num + '.png'"/>
+                <div class="rentImageContainer" id="rent-image-container" v-for="num in images_count">
+                    <img class="rentImage" :src="`/rent-photos/${rent.id}/` + (num - 1) + '.png'"/>
                 </div>
                 
             </div>
@@ -23,12 +22,19 @@
 </template>
 
 <script setup>
+import axios from 'axios';
 import { ref } from 'vue';
 
 let props = defineProps({
-    directory: String,
     rent: Object,
     user: Object
+})
+
+let images_count = ref(null);
+
+axios.get(`/photos-count/${props.rent.id}`).then(({data}) => {
+    console.log(data);
+    images_count.value = data;
 })
 
 let emits = defineEmits({
@@ -37,7 +43,6 @@ let emits = defineEmits({
 })
 
 let rentLink = ref(`/booking/rent/${props.rent.id}`);
-
 
 let page = ref(null);
 
@@ -52,6 +57,7 @@ let hoverHide = () => {
 }
 
 function nextPage() {
+    console.log(document.getElementById('rent-image-container'));
     page.value++;
 }
 
@@ -127,6 +133,7 @@ function removeFromWishlist() {
 }
 
 .hoverContainer {
+    position: absolute;
     width: 100%;
     height: 100%;
     margin-bottom: 10px;
