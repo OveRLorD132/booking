@@ -53,8 +53,8 @@ function onRemoveWish(id) {
     cursor: pointer;
 }
 .hoverContainer {
-    width: 250px;
-    height: 250px;
+    width: 340px;
+    height: 340px;
     border-radius: 10px;
     position: fixed;
     background-color: rgb(245, 245, 245, 0.5);

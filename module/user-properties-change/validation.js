@@ -40,6 +40,18 @@ function validateCountry(country) {
   if(country.length >= 200) throw new Error(`Country name is too long.`);
   return;
 }
+
+function validatePassword(password) {
+  if(!password) return;
+  if(password.length < 6) throw new Error('Your password must be at least 6 symbols.');
+  if(password.length > 20) throw new Error('Password is too long.');
+  return;
+}
+
+function validateBirthDate(date) {
+  if(!date) return;
+  if(date.getFullYear() > new Date().getFullYear()) throw new Error('Invalid birth date.');
+}
  
 export default { 
   validateUsername, 
@@ -48,5 +60,6 @@ export default {
   validateGender, 
   validateEmail, 
   validatePhoneNumber,
-  validateCountry
+  validateCountry,
+  validatePassword
 };

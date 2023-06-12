@@ -1,88 +1,68 @@
 <template>
-    <LineComponent />
+    <UpperLine/>
+    <FlashMessages :messages="flashMessages"/>
     <div class="mainContainer">
-        <form @submit.prevent="registration" class="registrationForm">
-            <div class="registrationRow">
-                First Name:
-                <input type="text" v-model="firstName" />
-            </div>
-            <div class="error">{{ firstNameError }}</div>
-            <div class="registrationRow">
-                Last Name:
-                <input type="text" v-model="lastName" />
-            </div>
-            <div class="error">{{ lastNameError }}</div>
-            <div class="registrationRow">
-                Username:
-                <input type="text" v-model="username"/>
-            </div>
-            <div class="error">{{ usernameError }}</div>
-            <div class="registrationRow">
-                E-mail:
-                <input type="text" v-model="email"/>
-            </div>
-            <div class="error">{{ emailError }}</div>
-            <div class="registrationRow">
-                Password:
-                <input type="password" v-model="password"/>
-            </div>
-            <div class="error">{{ passwordError }}</div>
-            <input type="submit" value="Sign Up"/>
-        </form>
+        <FirstStep @first-name-input="setFirstName" @last-name-input="setLastName" v-show="step === 1"/>
+        <SecondStep @username-input="setUsername" @email-input="setEmail" v-show="step === 2"/>
+        <ThirdStep @password-input="setPassword" @confirm-input="setComfirm" v-show="step === 3"/>
+        <FourthStep v-show="step === 4"/>
+        <FifthStep v-show="step === 5"/>
     </div>
-
+    <BottomLine :step="step" @step-back="stepBack" @step-next="stepNext"/>
 </template>
 
 <script setup>
 import axios from 'axios';
 import { ref, watch } from 'vue';
-import LineComponent from '../components/LineComponent.vue';
-let firstNameError = ref(null);
-let firstName = ref(null);
+import UpperLine from '../Profile/components/UpperLine.vue';
+import FlashMessages from '../components/FlashMessages.vue';
+import BottomLine from '../components/BottomLine.vue';
 
-watch(firstName, (newValue) => {
-    if(newValue === "") firstNameError.value = "This field mustn't be empty.";
-    else if(newValue.length > 50) firstNameError.value = "Your name is too long.";
-    else firstNameError.value = null;
-})
+import FirstStep from './components/FirstStep.vue';
+import SecondStep from './components/SecondStep.vue';
+import ThirdStep from './components/ThirdStep.vue';
+import FourthStep from './components/FourthStep.vue';
+import FifthStep from './components/FifthStep.vue';
 
-let lastNameError = ref(null);
-let lastName = ref(null);
+let flashMessages = ref([]);
 
-watch(lastName, (newValue) => {
-    if(newValue === "") lastNameError.value = "This field mustn't be empty.";
-    else if(newValue.length > 50) lastNameError.value = "Your name is too long.";
-    else lastNameError.value = null;
-})
+let step = ref(4);
 
-let usernameError = ref(null);
+let first_name = ref(null);
+
+function setFirstName(name) {
+    first_name.value = name;
+}
+
+let last_name = ref(null);
+
+function setLastName(name) {
+    last_name.value = name;
+}
+
 let username = ref(null);
 
-watch(username, (newValue) => {
-    if(newValue === "") usernameError.value = "This field mustn't be empty.";
-    else if(newValue.length < 8) usernameError.value = "Your username must be at least 8 symbols.";
-    else if(newValue.length > 20) usernameError.value = "Your username is too long.";
-    else usernameError.value = null;
-})
+function setUsername(name) {
+    username.value = name;
+}
 
-let emailError = ref(null);
 let email = ref(null);
 
-watch(email, (newValue) => {
-    if(newValue === "") emailError.value = "This field mustn't be empty.";
-    else if(newValue.length > 50) emailError.value = "Email is too long.";
-    else emailError.value = null;
-})
+function setEmail(value) {
+    email.value = value;
+}
 
-let passwordError = ref(null);
 let password = ref(null);
 
-watch(password, (newValue) => {
-    if(newValue === "") passwordError.value = "This field mustn't be empty.";
-    else if(newValue.length < 8) passwordError.value = "Your password must be at least 8 symbols.";
-    else if(newValue.length > 30) passwordError.value = "Password is too long.";
-    else passwordError.value = null;
-})
+function setPassword(pass) {
+    password.value = pass;
+}
+
+let passwordConfirm = ref(null);
+
+function setComfirm(confirm) {
+    passwordConfirm.value = confirm;
+}
 
 let registration = async () => {
     if(firstNameError.value || lastNameError.value || usernameError.value || emailError.value || passwordError.value) return;
@@ -99,15 +79,43 @@ let registration = async () => {
         console.error(err);
     }
 }
+
+async function stepNext() {
+    switch(step.value) {
+        case 1:
+            if(last_name.value && first_name.value) step.value++;
+            break;
+        case 2:
+            if(!username.value || !email.value) return;
+            try {
+                let { data } = await axios.post('/registration/unique-check', {username: username.value, email: email.value});
+                step.value++;
+            } catch(err) {
+                if(err.response.status === 400) axios.get('/flash-messages').then(({ data }) => flashMessages.value = data);
+                else console.error(err);
+            }
+            break;
+        case 3:
+            if(!password.value || !passwordConfirm.value) return;
+            if(password.value === passwordConfirm.value) step.value++;
+        default:
+            break;
+    }
+}
+
+function stepBack() {
+    if(step.value > 0) step.value--;
+}
+
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 @import '../../public/stylesheets/colors.scss';
 .mainContainer {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    min-height: calc(100vh - 75px);
     width: 100%;
 }
 .registrationForm {
@@ -116,20 +124,11 @@ let registration = async () => {
     flex-direction: column;
 }
 
-.error {
-    margin-right: 17px;
-    align-self: flex-end;
-    color: #D0000C;
-}
-
-input[type="text"], 
-input[type="password"] {
-    margin: 10px 10px 10px 10px;
-    padding: 10px 10px 10px 10px;
+.registration-error {
+    color: $error-red;
     font-size: 16px;
-    border-radius: 5px;
-    border: none;
-    background-color: $input-back;
+    line-height: 1.5;
+    align-self: flex-start;
 }
 
 input[type="submit"] {
@@ -145,11 +144,93 @@ input[type="submit"] {
     font-size: 18px;
 }
 
+.registration-input-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.register-input {
+  font-family: 'Roboto';
+  font-size: 16px;
+  padding: 15px 10px 15px 10px;
+  margin: 10px 0 10px 0;
+  border-radius: 5px;
+  width: 400px;
+  border: 3px $input-back solid;
+  outline-color: $button-red;
+  &.description-input {
+    width: 400px;
+    height: 150px;
+    resize: vertical;
+    border-radius: 10px;
+  }
+  &.description-input:focus {
+    color: black;
+  }
+}
+
+.registration-input-icon {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    right: 5px;
+}
+
+.optional {
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  right: 5px;
+}
+
+.optional-text {
+  position: absolute;
+  font-size: 16px;
+  padding: 10px 10px 10px 10px;
+  box-shadow: 0px 0px 1px 0px rgba(0,0,0,0.75);
+}
+
+.register-input:focus {
+    color: $button-red;
+}
+
+.registration-label {
+    width: 425px;
+    display: flex;
+    align-items: center;
+    position: relative;
+  font-size: 24px;
+  &.description-label {
+        display: flex;
+        align-items: center;
+        width: 400px;
+    }
+}
+
+
 .registrationRow {
     width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
+}
+
+.hover-show-leave-to {
+  opacity: 0;
+}
+
+.hover-show-enter-from {
+  opacity: 0;
+}
+
+.hover-show-enter-active {
+  transition: all .3s;
+}
+
+.hover-show-leave-active {
+  transition: all .3s;
 }
 </style>

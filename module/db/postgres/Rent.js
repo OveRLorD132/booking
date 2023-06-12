@@ -41,7 +41,7 @@ export default class Rent {
   getRentById(id) {
     return new Promise((resolve, reject) => {
       this.client.query(
-        `SELECT users.username AS user_name, rental_properties.*, COALESCE((SELECT AVG(rating) 
+        `SELECT users.first_name AS first_name, rental_properties.*, COALESCE((SELECT AVG(rating) 
         FROM comments WHERE rent_id = $1), 5) AS rating 
         FROM users
         INNER JOIN rental_properties ON users.id = rental_properties.user_id WHERE rental_properties.id = $1`,
@@ -154,5 +154,21 @@ export default class Rent {
         }
       );
     });
+  }
+  checkUsernameUnique(username) {
+    return new Promise((resolve, reject) => {
+      this.client.query(`SELECT username FROM users WHERE username = $1`, [username], (err, result) => {
+        if(err) reject(err);
+        else resolve(result.rowCount);
+      })
+    })
+  }
+  checkEmailUnique(email) {
+    return new Promise((resolve, reject) => {
+      this.client.query(`SELECT email FROM users WHERE email = $1`, [email], (err, result) => {
+        if(err) reject(err);
+        else resolve(result.rowCount);
+      })
+    })
   }
 }

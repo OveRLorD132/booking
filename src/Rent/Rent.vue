@@ -35,8 +35,9 @@
                         <option class="type-option">Duplex</option>
                         <option class="type-option">Guesthouse</option>
                     </select>
-                    , rent by {{ rent.user_name }}
+                    , rent by {{ rent.first_name }}
                 </h2>
+                <img class="user-image" src="/images/no-avatar.png"/>
             </div>
             <div class="rentAbout">
                 <h1>About</h1>
@@ -109,6 +110,7 @@ let editIsVisible = ref(false);
 
 axios.get(`${window.location.pathname}/rent`).then(({ data }) => {
     rent.value = data;
+    console.log(rent.value);
     rent.value.address = JSON.parse(data.address);
     let rating = +rent.value.rating;
     rent.value.rating = rating.toFixed(2);
@@ -371,7 +373,16 @@ function setMarker(marker) {
 }
 
 .description {
-    align-self: flex-start;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    //align-self: flex-start;
+}
+
+.user-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
 }
 
 .desc-header {

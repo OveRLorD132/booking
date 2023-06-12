@@ -11,8 +11,8 @@
             <img src="/images/imgButton.png" class="back" v-if="page > 0" @click.stop="back"/>
         </div>
         <a class="rentLink" :href="rentLink">
-            <div class="imagesContainer" :style="{transform: `translateX(${-page * 250}px)`}">
-                <div class="rentImageContainer" id="rent-image-container" v-for="num in images_count">
+            <div class="imagesContainer" :style="{transform: `translateX(${-page * 340}px)`}">
+                <div class="rentImageContainer" v-for="num in images_count">
                     <img class="rentImage" :src="`/rent-photos/${rent.id}/` + (num - 1) + '.png'"/>
                 </div>
                 
@@ -57,7 +57,6 @@ let hoverHide = () => {
 }
 
 function nextPage() {
-    console.log(document.getElementById('rent-image-container'));
     page.value++;
 }
 
@@ -102,15 +101,15 @@ function removeFromWishlist() {
 }
 
 .rentImageContainer {
-    width: 250px;
-    height: 250px;
+    width: 340px;
+    height: 340px;
 }
 .rentImage {
     cursor: pointer;
     object-position: center;
     object-fit: cover;
-    width: 250px;
-    height: 250px;
+    width: 340px;
+    height: 340px;
 }
 
 .wishListButton {
@@ -133,15 +132,14 @@ function removeFromWishlist() {
 }
 
 .hoverContainer {
-    position: absolute;
     width: 100%;
     height: 100%;
     margin-bottom: 10px;
 }
 
 .imagesContainer {
-    width: 250px;
-    height: 250px;
+    width: 340px;
+    height: 340px;
     display: flex;
     transition: all .1s;
     flex-direction: row;

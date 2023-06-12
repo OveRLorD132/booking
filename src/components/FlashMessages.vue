@@ -40,7 +40,6 @@ let success = ref([]);
 let info = ref([]);
 
 watch(props, (newProp) => {
-  console.log(newProp);
   if(newProp.messages) {
     if (newProp.messages.error) {
       for (let message of newProp.messages.error) {
@@ -59,17 +58,17 @@ watch(props, (newProp) => {
     }
     if(errors.value && errors.value.length) {
       for(let i = 0; i < errors.value.length; i++) {
-        setTimeout(errors.value.splice(i, 1), 20000);
+        setTimeout(errors.value.splice(i, 1), 10000);
       }
     }
     if(success.value && success.value.length) {
       for(let i = 0; i < success.value.length; i++) {
-        setTimeout(() => success.value.splice(i, 1), 20000);
+        setTimeout(() => success.value.splice(i, 1), 10000);
       }
     }
     if(info.value && info.value.length) {
       for(let i = 0; i < info.value.length; i++) {
-        setTimeout(info.value.splice(i, 1), 20000);
+        setTimeout(info.value.splice(i, 1), 10000);
       }
     }
   }
@@ -125,11 +124,11 @@ watch(props, (newProp) => {
 
 
 .flash-show-enter-active {
-  transition: all 10s ease;
+  transition: all 1s ease;
 }
 
 .flash-show-leave-active {
-  transition: all 10s ease;
+  transition: all 1s ease;
 }
 
 .flash-show-enter-from {
