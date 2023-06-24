@@ -5,10 +5,11 @@
         <FirstStep @first-name-input="setFirstName" @last-name-input="setLastName" v-show="step === 1"/>
         <SecondStep @username-input="setUsername" @email-input="setEmail" v-show="step === 2"/>
         <ThirdStep @password-input="setPassword" @confirm-input="setComfirm" v-show="step === 3"/>
-        <FourthStep v-show="step === 4"/>
-        <FifthStep v-show="step === 5"/>
+        <FourthStep @date-input="setDate" @phone-input="setPhoneNumber" @gender-input="setGender" v-show="step === 4"/>
+        <FifthStep @type-input="setType" @country-input="setCountry" @description-input="setDecription" :date="date" v-show="step === 5"/>
+        <SixthStep v-show="step === 6"/>
     </div>
-    <BottomLine :step="step" @step-back="stepBack" @step-next="stepNext"/>
+    <BottomLine v-if="step < 6" :step="step" @step-back="stepBack" @step-next="stepNext"/>
 </template>
 
 <script setup>
@@ -23,10 +24,11 @@ import SecondStep from './components/SecondStep.vue';
 import ThirdStep from './components/ThirdStep.vue';
 import FourthStep from './components/FourthStep.vue';
 import FifthStep from './components/FifthStep.vue';
+import SixthStep from './components/SixthStep.vue';
 
 let flashMessages = ref([]);
 
-let step = ref(4);
+let step = ref(6);
 
 let first_name = ref(null);
 
@@ -64,20 +66,40 @@ function setComfirm(confirm) {
     passwordConfirm.value = confirm;
 }
 
-let registration = async () => {
-    if(firstNameError.value || lastNameError.value || usernameError.value || emailError.value || passwordError.value) return;
-    else if(!firstName.value || !lastName.value || !username.value || !email.value || !password.value) return;
-    try {
-        await axios.post('/registration', {
-            first_name: firstName.value,
-            last_name: lastName.value,
-            username: username.value,
-            email: email.value,
-            password: password.value
-        })
-    } catch(err) {
-        console.error(err);
-    }
+let date = ref(null);
+
+function setDate(newDate) {
+    date.value = newDate;
+}
+
+let phone = ref(null);
+
+function setPhoneNumber(num) {
+    phone.value = num;
+}
+
+let gender = ref(null);
+
+function setGender(value) {
+    gender.value = value;
+}
+
+let type = ref('Guest');
+
+function setType(value) {
+    type.value = value;
+}
+
+let country = ref('--Select country--');
+
+function setCountry(value) {
+    country.value = value;
+}
+
+let description = ref(null);
+
+function setDecription(value) {
+    description.value = value;
 }
 
 async function stepNext() {
@@ -98,6 +120,37 @@ async function stepNext() {
         case 3:
             if(!password.value || !passwordConfirm.value) return;
             if(password.value === passwordConfirm.value) step.value++;
+            break;
+        case 4: 
+            if(date.value !== 'Invalid' && gender.value !== 'Invalid' && phone.value !== 'Invalid') step.value++;
+            break;
+        case 5:
+            if(type.value === 'Host') {
+                if(!description.value || description.value === 'Invalid') return;
+            }
+            if(description.value === 'Invalid') return;
+            else {
+                let registrationObject = {
+                    first_name: first_name.value,
+                    last_name: last_name.value,
+                    username: username.value,
+                    email: email.value,
+                    password: password.value,
+                    gender: gender.value,
+                    phone: phone.value,
+                    birth_date: date.value,
+                    type: type.value,
+                    country: country.value,
+                    description: description.value
+                }
+                try {
+                    let response = await axios.post('/registration', registrationObject);
+                    step.value++;
+                } catch(err) {
+                    console.error(err);
+                }
+            }
+            break;
         default:
             break;
     }
@@ -183,6 +236,7 @@ input[type="submit"] {
   height: 15px;
   position: absolute;
   right: 5px;
+  cursor: pointer;
 }
 
 .optional-text {

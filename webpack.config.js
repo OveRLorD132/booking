@@ -4,7 +4,7 @@ import path from 'path';
 
 export default {
     mode: 'development',
-    entry: './src/Registration/registration.js',
+    entry: './src/Complains/complains.js',
     cache: {
         type: 'filesystem',
         allowCollectingMemory: true,
@@ -15,8 +15,8 @@ export default {
         splitChunks: false,
     },
     output: {
-        path: path.resolve(__dirname, 'public', 'javascripts', 'Registration'),
-        filename: 'registration.js',
+        path: path.resolve(__dirname, 'public', 'javascripts', 'Complains'),
+        filename: 'complains.js',
         clean: true,
     },
     module: {

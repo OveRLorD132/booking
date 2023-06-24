@@ -5,10 +5,11 @@
       <div class="step-progress" :style="{backgroundColor: step > 2 ? 'black' : ''}"/>
       <div class="step-progress" :style="{backgroundColor: step > 3 ? 'black' : ''}"/>
       <div class="step-progress" :style="{backgroundColor: step > 4 ? 'black' : ''}"/>
+      <div class="step-progress" :style="{backgroundColor: step > 5 ? 'black' : ''}"/>
     </div>
     <div class="buttons">
       <div class="bottom-button back-button" @click="stepBack">Back</div>
-      <div class="bottom-button next-button" @click="stepNext">Next</div>
+      <div class="bottom-button next-button" @click="stepNext" v-if="step !== 6">{{ step === 5 ? 'Finish' :'Next'}}</div>
     </div>
   </div>
 </template>

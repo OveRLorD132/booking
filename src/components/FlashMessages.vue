@@ -40,6 +40,7 @@ let success = ref([]);
 let info = ref([]);
 
 watch(props, (newProp) => {
+  console.log(newProp);
   if(newProp.messages) {
     if (newProp.messages.error) {
       for (let message of newProp.messages.error) {
@@ -79,12 +80,14 @@ watch(props, (newProp) => {
 .messageContainer {
   display: flex;
   flex-direction: column;
-  position: absolute;
+  position: fixed;
+  z-index: 200;
   top: 65px;
   right: 0;
 }
 
 .flashMessage {
+  background-color: #fff;
   margin-top: 20px;
   display: flex;
   flex-direction: row;

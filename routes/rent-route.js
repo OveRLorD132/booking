@@ -14,6 +14,12 @@ import StaticPhotos from "../module/serve-static/rent-photos.js";
 
 let staticPhotos = new StaticPhotos();
 
+import Complains from "../module/db/postgres/Complains.js";
+
+let complains = new Complains();
+
+import complainUserCheck from "../module/middlewares/complain-user-check.js";
+
 let rent = new Rent();
 
 let router = Router();
@@ -99,6 +105,19 @@ router.patch('/rent/change-properties', authCheck.authCheckClient, rentUserCheck
         res.send(doneObj);
     }
 
+})
+
+router.post('/rent/new-complain', authCheck.authCheckClient, complainUserCheck, async(req, res) => {
+    try {
+        await complains.addComplain(req.body.id, req.user.id, req.body.reason, req.body.text);
+        res.status(200);
+        req.flash('success', 'Complaint added successfully');
+        res.send('Success');
+    } catch(err) {
+        res.status(400);
+        req.flash('error', 'Internal server error');
+        res.send('Error');
+    }
 })
 
 export default router;

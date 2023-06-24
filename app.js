@@ -13,6 +13,8 @@ import setupRouter from './routes/setup-data.js';
 import rentRouter from './routes/rent-route.js';
 import RentAddRouter from './routes/rent-add.js';
 import profileRouter from './routes/profile-route.js'; 
+import complainsRouter from './routes/complains.js';
+import conversationsRouter from './routes/conversations.js';
 
 let app = express();
 
@@ -42,6 +44,8 @@ app.use(setupRouter);
 app.use(rentRouter);
 app.use(RentAddRouter);
 app.use(profileRouter);
+app.use(conversationsRouter);
+app.use(complainsRouter);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler

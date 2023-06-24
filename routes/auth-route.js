@@ -6,9 +6,9 @@ import registration from "../module/authentication/registration.js";
 
 import validation from "../module/user-properties-change/validation.js";
 
-import Rent from "../module/db/postgres/Rent.js";
+import Users from "../module/db/postgres/Users.js";
 
-let rent = new Rent();
+let users = new Users();
 
 let router = express.Router();
 
@@ -27,16 +27,44 @@ router.post('/login', passport.authenticate('local', {
 }),async(req, res) => {})
 
 router.post('/registration', async (req, res, next) => {
+    let registrationObj = req.body;
+    let { first_name, last_name, username, email, password, gender, phone, birth_date, type, country, description} = registrationObj
+    if(!first_name || !last_name || !username || !email || !password || !type) {
+        res.status(400);
+        req.flash('error', 'Invalid input.');
+        res.send('Error');
+        return;
+    } else if(type === 'Host' && !description) {
+        res.status(400);
+        req.flash('error', 'Invalid input.');
+        res.send('Error');
+        return;
+    } else if(await users.checkUsernameUnique(username) > 0 ||await users.checkEmailUnique(email)) {
+        res.status(400);
+        req.flash('error', 'Invalid input.');
+        res.send('Error');
+        return;
+    }
     try {
-        let result = await registration(req.body);
-        req.login(result, (err) => {
-            if(err) return next(err);
-            res.redirect('/');
-        })
+        validation.validateUsername(username);
+        validation.validateFirstName(first_name);
+        validation.validateLastName(last_name);
+        validation.validateEmail(email);
+        validation.validatePassword(password);
+        validation.validateGender(gender);
+        validation.validatePhoneNumber(phone);
+        validation.validateBirthDate(birth_date);
+        validation.validateType(type);
+        validation.validateCountry(country);
+        validation.validateDescription(description);
+        let result = await users.createProfile(registrationObj)
+        console.log(result);
+        res.send(result);
     } catch(err) {
-        console.error(err);
-        res.redirect('/registration');
-    } 
+        req.flash('error', err.message)
+        res.status(400);
+        res.send('Error');
+    }
 })
 
 router.post('/registration/unique-check', async(req, res) => {
@@ -57,8 +85,8 @@ router.post('/registration/unique-check', async(req, res) => {
     }
     else {
         try {
-            let usernameMatches = await rent.checkUsernameUnique(username);
-            let emailMatches = await rent.checkEmailUnique(email);
+            let usernameMatches = await users.checkUsernameUnique(username);
+            let emailMatches = await users.checkEmailUnique(email);
             if(usernameMatches > 0 || emailMatches > 0) {
                 if(usernameMatches > 0) req.flash('error', 'This username is already taken.');
                 if(emailMatches > 0) req.flash('error', 'This email is already taken.');

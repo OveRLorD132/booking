@@ -19,7 +19,7 @@ function validateLastName(last_name) {
 
 function validateGender(gender) {
   if(!gender) return;
-  if(gender.toLowerCase() !== 'male' || gender.toLowerCase() !== 'female') throw new Error('Invalid gender.')
+  if(gender !== 'Male' && gender !== 'Female' && gender !== 'Not selected') throw new Error('Invalid gender.')
 }
 
 function validateEmail(email) {
@@ -35,24 +35,46 @@ function validatePhoneNumber(number) {
   return;
 }
 
+import countriesList from './countries-list.js';
+
 function validateCountry(country) {
   if(!country) return;
-  if(country.length >= 200) throw new Error(`Country name is too long.`);
+  if(country === '--Select country--') return;
+  if(!countriesList.some((elem) => elem === country)) throw new Error('Invalid country.');
   return;
 }
 
+import passwordCheck from './password-check.js';
+
 function validatePassword(password) {
-  if(!password) return;
-  if(password.length < 6) throw new Error('Your password must be at least 6 symbols.');
-  if(password.length > 20) throw new Error('Password is too long.');
+  if(password.length > 20) throw new Error('Password is too long.'); 
+  if(passwordCheck(passwordCheck) === 'Weak') throw new Error('Your password is too weak.')
+  return;
+}
+
+function validateDescription(description) {
+  if(!description) return;
+  if(description.length > 250) throw new Error('Description is too long. 250 symbols is maximum.');
   return;
 }
 
 function validateBirthDate(date) {
   if(!date) return;
-  if(date.getFullYear() > new Date().getFullYear()) throw new Error('Invalid birth date.');
+  if(isNaN(Date.parse(date))) throw new Error('Invalid date format');
+  if(!isNaN(Date.parse(date))) date = new Date(Date.parse(date));
+  if(date.getFullYear() > new Date().getFullYear()) throw new Error('Invalid birth date');
+  if(date.getFullYear() === new Date().getFullYear() 
+  && date.getMonth() > new Date().getMonth()) throw new Error('Invalid birth date'); 
+  if(date.getFullYear() === new Date().getFullYear() && date.getMonth() === new Date().getMonth() 
+  && date.getDate() > new Date().getDate()) throw new Error('Invalid birth date');
+  return;
 }
- 
+
+function validateType(type) {
+  if(type !== 'Host' && type !== 'Guest') throw new Error('Invalid type');
+  return;
+}
+
 export default { 
   validateUsername, 
   validateFirstName, 
@@ -61,5 +83,8 @@ export default {
   validateEmail, 
   validatePhoneNumber,
   validateCountry,
-  validatePassword
+  validatePassword,
+  validateDescription,
+  validateBirthDate,
+  validateType
 };

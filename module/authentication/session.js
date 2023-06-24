@@ -1,14 +1,10 @@
 import passport from "./passport-config.js";
-import session from "express-session";
 import flash from 'connect-flash';
 
+import sessionSetup from "./session-setup.js";
+
 export function sessionMiddleware(app) {
-    app.use(session({
-        secret: 'some secret',
-        resave: false,
-        saveUninitialized: false,
-        cookie: { maxAge: 60 * 60 * 1000}
-    }));
+    app.use(sessionSetup);
     app.use(flash());
     app.use(passport.initialize());
     app.use(passport.session());

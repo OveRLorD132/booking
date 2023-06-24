@@ -1,15 +1,19 @@
 <template>
-    <UpperLine @user-profile="loadProfile" />
     <Transition name="show-all-images">
         <AllImages :images="images" @hide-dialog="hideAllImages" :edit-is-visible="editIsVisible" :rent="rent"
             v-if="rent && allImagesIsVisible" @images-changed="onImagesChanged" />
     </Transition>
+    <ComplainComponent @complaint-end="showComplaintEnd" @close-dialog="closeComplain" v-if="complainIsVisible" :rent="rent"/>
     <div class="mainContainer" v-if="rent">
+        <FlashMessages :messages="messages"/>
         <title>{{ rent.header }}</title>
         <div class="rentContainer">
             <img class="rent-edit" src="/images/rent-edit.png" v-if="!isEditing && editIsVisible" @click="startEdit" />
             <div class="rentTitle">
-                <h1 v-if="!isEditing">{{ rent.header }}</h1>
+                <h1 class="rent-header" v-if="!isEditing">
+                    {{ rent.header }}
+                    <img class="complain-btn" v-if="user && user.id != rent.user_id" @click="showComplain" src="/images/complain.png"/>
+                </h1>
                 <input type="text" v-if="isEditing" v-model="editedHeader" class="header-edit" />
                 <div class="error-text" v-if="isEditing && headerError">{{ headerError }}</div>
                 <div class="adressContainer">
@@ -37,7 +41,6 @@
                     </select>
                     , rent by {{ rent.first_name }}
                 </h2>
-                <img class="user-image" src="/images/no-avatar.png"/>
             </div>
             <div class="rentAbout">
                 <h1>About</h1>
@@ -58,12 +61,24 @@
 
                     <div class="messagesContainer">
                         <CommentComponent v-for="(comment, index) in comments" :key="comment.id" :comment="comment"
-                            :user="user" :socket="socket" :index="index" :rent="rent" />
+                          :user="user" :socket="socket" :index="index" :rent="rent" />
                     </div>
                 </div>
             </div>
             <MapComponent :coords="rent.address.coords" :rent="rent" v-if="rent.address.coords || editIsVisible"
                 @new-marker="setMarker" />
+            <div class="host-info">
+                <h2 class="host-info-label">About host</h2>
+                <div class="user-short-info">
+                    <img class="user-image" src="/images/no-avatar.png"/>
+                    <div class="right-info-cont">
+                        <div class="first-name">{{ rent.first_name }}</div>
+                        <div class="joined-date">Joined {{ formatJoinDate(rent.join_date) }}</div>
+                    </div>
+                </div>
+                <div class="host-description">{{ rent.user_description }}</div>
+                <div class="contact-btn" @click="showHost">Contact host</div>
+            </div>
         </div>
     </div>
     <div class="buttons-container" v-if="isEditing">
@@ -77,7 +92,10 @@
 
 <script setup>
 import axios from 'axios';
-import { ref, onMounted, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
+
+import { useRouter, useRoute } from 'vue-router';
+
 import io from 'socket.io-client';
 let socket = io();
 import AllImages from './components/AllImages.vue';
@@ -86,45 +104,73 @@ import CommentComponent from './components/CommentComponent.vue';
 import ImagesComponent from './components/ImagesComponent.vue';
 
 import Comment from './module/Comment';
-import UpperLine from '../Profile/components/UpperLine.vue';
 import MapComponent from './components/MapComponent.vue';
 
 import validator from '../../module/rent-change/rent-validation';
 
+import formatJoinDate from './module/format-join-date';
+import ComplainComponent from './components/ComplainComponent.vue';
+
+import FlashMessages from '../components/FlashMessages.vue';
+
 let rent = ref(null);
-let user = ref(null);
 let comments = ref([]);
 let allImagesIsVisible = ref(false);
 socket = ref(socket);
 
-let images = ref(null);
+let router = useRouter();
 
-let loadProfile = (profile) => {
-    user.value = profile;
+let route = useRoute();
+
+let props = defineProps({
+    user: {type: Object, required: true},
+    rent: {type: Object, required: true}
+})
+
+let emits = defineEmits({
+})
+
+onMounted(() => {
+    rent.value = props.rent;
+    console.log(props);
+})
+
+watch(() => props.user, (newValue) => {
     if (rent.value) {
-        if (rent.value.user_id == user.value.id) editIsVisible.value = true;
+        if (rent.value.user_id == newValue.id) editIsVisible.value = true;
     }
-}
+})
+
+console.log(route);
+
+let images = ref(null);
 
 let editIsVisible = ref(false);
 
-axios.get(`${window.location.pathname}/rent`).then(({ data }) => {
-    rent.value = data;
-    console.log(rent.value);
-    rent.value.address = JSON.parse(data.address);
-    let rating = +rent.value.rating;
-    rent.value.rating = rating.toFixed(2);
+watch(() => props.rent, (newValue) => {
+    console.log(props.rent);
+    rent.value = newValue;
     socket.value.emit('load-request', rent.value.id);
-    if (user.value) {
-        if (rent.value.user_id == user.value.id) editIsVisible.value = true;
+    if (props.user) {
+        if (rent.value.user_id == props.user.id) editIsVisible.value = true;
     }
-}).then(() => {
     axios.get(`/load-photos?id=${rent.value.id}`).then(({ data }) => {
         images.value = data.map((file) => 'data:image/jpeg;base64,' + file)
     })
-}).catch((err) => {
-    console.error(err);
 })
+
+// axios.get(`${window.location.pathname}/rent`).then(({ data }) => {
+//     rent.value = data;
+//     rent.value.address = JSON.parse(data.address);
+//     let rating = +rent.value.rating;
+//     rent.value.rating = rating.toFixed(2);
+
+    
+// }).then(() => {
+    
+// }).catch((err) => {
+//     console.error(err);
+// })
 
 socket.value.on('load-result', (response) => {
     for (let comment of response) {
@@ -151,6 +197,7 @@ socket.value.on('delete-result', (index) => {
 })
 
 function showAllImages() {
+    console.log(props);
     allImagesIsVisible.value = true;
     document.documentElement.classList.add('hide-html-overflow');
 }
@@ -173,8 +220,8 @@ let editedAddress = ref(null);
 let editedType = ref(null);
 
 function startEdit() {
-    if (!user.value) return;
-    if (rent.value.user_id != user.value.id) return;
+    if (!props.user) return;
+    if (rent.value.user_id != props.user.id) return;
     isEditing.value = true;
     if (!editedHeader.value) editedHeader.value = rent.value.header;
     if (!editedDescription.value) editedDescription.value = rent.value.description;
@@ -304,6 +351,31 @@ function onImagesChanged(changedImages) {
 function setMarker(marker) {
     rent.value.address.coords = marker;
 } 
+
+function showHost() {
+    router.push('/host');
+}
+
+let complainIsVisible = ref(false);
+
+function showComplain() {
+    if(!props.user) return;
+    if(props.user.id == rent.value.user_id) return;
+    complainIsVisible.value = true;
+}
+
+function closeComplain() {
+    complainIsVisible.value = false;
+}
+
+let messages = ref([]);
+
+async function showComplaintEnd() {
+    complainIsVisible.value = false;
+    axios.get('/flash-messages').then(({ data }) => {
+        messages.value = data;
+    })
+}
 </script>
 
 <style scoped lang="scss">
@@ -336,7 +408,6 @@ function setMarker(marker) {
 }
 
 .mainContainer {
-    margin-top: 70px;
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
@@ -376,10 +447,12 @@ function setMarker(marker) {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    //align-self: flex-start;
+    align-items: center;
+    align-self: flex-start;
 }
 
 .user-image {
+    margin-right: 10px;
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -500,5 +573,56 @@ function setMarker(marker) {
     display: flex;
     flex-direction: column;
 } 
+
+.host-info {
+    align-self: flex-start;
+}
+
+.first-name {
+    margin-left: 5px;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.joined-date {
+    color: $description-grey;
+}
+
+.user-short-info {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+}
+
+.host-description {
+    max-width: 700px;
+}
+
+.contact-btn {
+    width: 250px;
+    text-align: center;
+    cursor: pointer;
+    border: 2px black solid;
+    border-radius: 10px;
+    font-size: 18px;
+    padding: 10px 10px 10px 10px;
+    margin: 10px 10px 10px 0;
+}
+
+.contact-btn:hover {
+    background-color: $calendar-grey;
+}
+
+.rent-header {
+    display: flex; 
+    align-items: center;
+    justify-content: space-between;
+}
+
+.complain-btn {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
 </style>
 

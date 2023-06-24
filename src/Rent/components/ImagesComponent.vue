@@ -32,13 +32,13 @@ let props = defineProps({
 
 .imagesContainer {
     position: relative;
-    min-height: 420px;
-    max-width: 840px;
+    min-height: 620px;
+    max-width: 1240px;
     margin-top: 10px;
     display: grid;
     align-content: center;
     align-items: center;
-    grid-template-columns: repeat(4, 200px);
+    grid-template-columns: repeat(4, 300px);
     gap: 10px;
 }
 
@@ -57,13 +57,13 @@ let props = defineProps({
 }
 
 .mainImage {
-    width: 410px;
-    height: 410px;
+    width: 610px;
+    height: 610px;
 }
 
 .subImage {
-    width: 200px;
-    height: 200px;
+    width: 300px;
+    height: 300px;
 }
 
 .fullImageContainer {

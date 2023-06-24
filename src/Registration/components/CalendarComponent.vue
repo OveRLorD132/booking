@@ -160,6 +160,7 @@ function compareDates(date1, date2) {
 }
 
 .day-calendar-container {
+  background-color: #ffffff;
   position: absolute;
   top: 50px;
   padding: 10px 10px 10px 10px;
@@ -168,6 +169,7 @@ function compareDates(date1, date2) {
 }
 
 .month-calendar-container {
+  background-color: #ffffff;
   position: absolute;
   top: 50px;
   padding: 10px 10px 10px 10px;

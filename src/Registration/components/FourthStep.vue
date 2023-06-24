@@ -10,8 +10,10 @@
       <div class="gender-choose-container">
         <input type="radio" style="height: 25px; width: 25px;" value="Male" id="maleRadio" v-model="gender"/>
         <label for="maleRadio">Male</label>
-        <input type="radio" style="height: 25px; width: 25px;" value="Female" id="femaleRadio" v-model="gender"/>
+        <input type="radio" style="margin-left: 20px; height: 25px; width: 25px;" value="Female" id="femaleRadio" v-model="gender"/>
         <label for="femaleRadio">Female</label>
+        <input type="radio" style="margin-left: 20px; height: 25px; width: 25px;" value="Not selected" id="noneRadio" v-model="gender"/>
+        <label for="noneRadio">Not selected</label>
       </div>
     </div>
     <div class="registration-label">Type your phone number
@@ -23,6 +25,7 @@
     <div class="registration-input-container">
       <input type="text" class="register-input" v-model="phoneNumber"/>
     </div>
+    <div class="registration-error">{{ phoneNumError }}</div>
     <div class="registration-label">Choose your birth date
       <img @mouseover="showHover('date')" @mouseleave="hideHover('date')" class="optional" src="/images/optional.png">
         <Transition name="hover-show">
@@ -31,9 +34,11 @@
     </div>
     <div class="registration-input-container">
       <div class="date-label" @click="datePick">
-        {{ formatDate(date) }}
+        {{ typeof date !== 'string' ? formatDate(date) : date}}
         <img class="pick-img" src="/images/choose-arrow.png"/>
       </div>
+      <div class="registration-error">{{ dateError }}</div>
+      <div class="clear-btn" @click="clearDate">Clear</div>
       <CalendarComponent @date-picked="onDatePicked" v-if="calendarIsVisible"/>
     </div>
   </div>
@@ -42,11 +47,15 @@
 <script setup>
 import CalendarComponent from './CalendarComponent.vue';
 
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
-let gender = ref(null);
+import validation from '../../../module/user-properties-change/validation';
 
-let date = ref(new Date());
+let gender = ref('Not selected');
+
+let phoneNumber = ref(null);
+
+let date = ref('Not chosen');
 
 let calendarIsVisible = ref(false);
 
@@ -55,6 +64,12 @@ let phoneLabelIsHovered = ref(false);
 let genderLabelIsHovered = ref(false);
 
 let dateLabelIsHovered = ref(false);
+
+let emits = defineEmits({
+  'date-input': null,
+  'phone-input': null,
+  'gender-input': null
+})
 
 function showHover(fieldNum) {
   switch(fieldNum) {
@@ -88,8 +103,51 @@ function hideHover(fieldNum) {
   }
 }
 
+watch(gender, (newVal) => {
+  emits('gender-input', newVal);
+})
+
+let phoneNumError = ref(null);
+
+watch(phoneNumber, (newVal) => {
+  if(!newVal) emits('phone-input', '');
+  try {
+    validation.validatePhoneNumber(newVal);
+    phoneNumError.value = null;
+    emits('phone-input', newVal);
+  } catch(err) {
+    emits('phone-input', 'Invalid');
+    phoneNumError.value = err.message;
+  }
+})
+
+let dateError = ref(null);
+
+watch(date, (newDate) => {
+  if (newDate === 'Not chosen') emits('date-input', '');
+  else if (!newDate) emits('date-input', '');
+  else {
+    try {
+      validation.validateBirthDate(newDate);
+      dateError.value = null;
+      emits('date-input', newDate)
+    } catch (err) {
+      emits('date-input', 'Invalid');
+      dateError.value = err.message;
+    }
+  }
+})
+
 function formatDate(dateObj) {
-  return `${dateObj.getDate()}.${dateObj.getMonth() + 1}.${dateObj.getFullYear()}`;
+  let day = dateObj.getDate();
+  if(day < 10) {
+    day = '0' + day;
+  }
+  let month = dateObj.getMonth() + 1;
+  if(month < 10) {
+    month = '0' + month;
+  }
+  return `${day}.${month}.${dateObj.getFullYear()}`;
 }
 
 function datePick() {
@@ -99,21 +157,24 @@ function datePick() {
 function onDatePicked(newDate) {
   date.value = newDate;
 }
+
+function clearDate() {
+  date.value = 'Not chosen';
+}
 </script>
 
 <style lang="scss">
 @import '../../../public/stylesheets/colors.scss';
 
 .gender-choose-container {
-  width: 200px;
   display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
   align-items: center;
 }
 
 .date-label {
+  margin-bottom: 5px;
   cursor: pointer;
   margin-top: 10px;
   display: flex;
@@ -127,5 +188,14 @@ function onDatePicked(newDate) {
   margin-left: 10px;
   width: 18px; 
   height: 18px;
+}
+
+.clear-btn {
+  color: #fff;
+  background-color: $button-red;
+  font-size: 18px;
+  padding: 10px 10px 10px 10px;
+  margin-top: 15px;
+  border-radius: 10px;
 }
 </style>
