@@ -160,15 +160,18 @@ function compareDates(date1, date2) {
 }
 
 .day-calendar-container {
+  margin-top: 20px;
   background-color: #ffffff;
   position: absolute;
   top: 50px;
   padding: 10px 10px 10px 10px;
   border-radius: 10px;
   box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+  z-index: 1;
 }
 
 .month-calendar-container {
+  margin-top: 20px;
   background-color: #ffffff;
   position: absolute;
   top: 50px;
@@ -177,11 +180,12 @@ function compareDates(date1, date2) {
   box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
   display: flex;
   flex-direction: column;
-  width: 200px;
+  width: 230px;
+  z-index: 1;
 }
 
 .year-container {
-  margin-top: 5px;
+  margin-top: 15px;
   margin-bottom: 5px;
   align-self: center;
   width: 180px;
@@ -194,7 +198,7 @@ function compareDates(date1, date2) {
   align-items: center;
   justify-content: center;
   justify-items: center;
-  grid-template-columns: repeat(4, 50px);
+  grid-template-columns: repeat(4, 57.5px);
   grid-template-rows: repeat(3, 50px);
 }
 

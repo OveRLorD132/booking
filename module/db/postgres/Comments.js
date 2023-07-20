@@ -11,19 +11,12 @@ export default class Comments {
         this.client = new Client({user: 'postgres', password: 'password', database: 'booking'})
         this.client.connect();
     }
-    addComment(obj) {
-        let keys = Object.keys(obj);
-        let values = Object.values(obj);
-        let placeholders = values.map((_, index) => `$${index + 1}`).join(", ");
-        let query = 
-        `INSERT INTO comments (${keys.join(", ")}) VALUES (${placeholders}) RETURNING id`;
+    addComment(rent_id, rating, text, user_id) {
         return new Promise((resolve, reject) => {
-            this.client.query(query, values, async (err, result) => {
+            let query = `INSERT INTO comments (rent_id, rating, text, user_id) VALUES ($1, $2, $3, $4) RETURNING id`;
+            this.client.query(query, [rent_id, rating, text, user_id], (err, result) => {
                 if(err) reject(err);
-                else  {
-                    let res = await this.getComment(result.rows[0].id);
-                    resolve(res);
-                }
+                else resolve(result.rows[0].id);
             })
         })
     }
@@ -36,7 +29,7 @@ export default class Comments {
             })
         })
     }
-    editComment({text, id, rating, rent_id}) {
+    editComment(text, id, rating) {
         return new Promise((resolve, reject) => {
             this.client.query(`UPDATE comments SET text = $1, rating = $3 WHERE id = $2`, [text, id, rating], async (err, result) => {
                 if(err) reject(err);

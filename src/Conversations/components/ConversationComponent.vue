@@ -1,8 +1,12 @@
 <template>
   <div class="conversation-container" v-if="conversation">
+    <title>{{ conversation.user1_id != user.id ? conversation.user1_name : conversation.user2_name }} - Conversation</title>
     <div class="messages-container" ref="messagesCont">
       <div class="conv-user-info">
-        <img class="conv-user-avatar" src="/images/no-avatar.png" />
+        <img class="conv-user-avatar" 
+          :src="`/profile-images/${conversation.user1_id != user.id ? conversation.user1_id : conversation.user2_id}.png`" 
+          onerror="this.src='/images/no-avatar.png'"
+          />
         <div class="conv-right-info">
           <div class="conv-user-name">
             {{ conversation.user1_id != user.id ? conversation.user1_name : conversation.user2_name }}
@@ -174,7 +178,7 @@ function changeMessage(message) {
 }
 
 .conv-user-avatar {
-  padding-left: 10px;
+  margin-left: 10px;
   border-radius: 50%;
   width: 65px;
   height: 65px;

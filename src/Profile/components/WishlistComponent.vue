@@ -1,8 +1,9 @@
 <template>
   <div class="wishlistMainContainer">
     <div class="wishlistContainer" v-if="wishlist">
-      <RentComponent v-for="(rent, index) in wishlist" :rent="rent" :user="user" @remove-wish="removeWish(rent.id, index)"
-        :key="rent.id" />
+      <RentComponent v-for="(rent, index) in wishlist" :rent="rent" :user="user" :key="rent.id"
+        @remove-wish="removeWish(rent.id, index)" @rent-hide="rentHide" @hide-error="showError"
+      />
     </div>
     <div class="wishlistLabel" v-if="!wishlist || !wishlist.length">You haven't added anything to wishlist.</div>
   </div>
@@ -21,6 +22,7 @@ let props = defineProps({
 
 let emits = defineEmits({
   'remove-wish': (id) => typeof id === 'number',
+  'hide-error': null
 })
 
 let wishlist = ref(null)
@@ -52,12 +54,22 @@ async function removeWish(id, index) {
   }
 
 }
+
+function rentHide(id) {
+  for(let wish of wishlist.value) {
+    if(wish.id == id) { wish.is_hidden = !wish.is_hidden; break; }
+  }
+}
+
+function showError() {
+  emits('hide-error');
+}
 </script>
 
 <style lang="scss">
 .wishlistContainer {
+  flex-wrap: wrap;
   display: flex;
-  max-width: 800px;
 } 
 
 .wishlistLabel {

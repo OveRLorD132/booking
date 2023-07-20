@@ -11,6 +11,8 @@ import conversations from "./conversations.js";
 
 import connection from "./connection.js";
 
+import notifications from "./notifications.js";
+
 export default function socketConnect() {
     let io = new Server(server);
     io.use((socket, next) => sessionSetup(socket.request, {}, next))
@@ -19,6 +21,7 @@ export default function socketConnect() {
         comments(socket, io);
         conversations(socket, io);
         connection(socket, io);
+        notifications(socket, io);
     })
 };
 

@@ -6,9 +6,21 @@
         :style="{borderColor: settingsName === optionActive ? '#FF2F69' : '#767676'}">{{ settingsName }}
       </div>
     </div>
-    <ProfileSettings v-show="optionActive === 'Profile Settings'" :profile="profile" @profile-change="emitChange"/>
-    <AccountSettings v-show="optionActive === 'Account Settings'" :profile="profile" @account-change="emitAccountChange"/>
-    <WishlistComponent v-show="optionActive === 'Wishlist'" :user="profile" @remove-wish="onRemoveWish"/>
+    <ProfileSettings v-show="optionActive === 'Profile Settings'" 
+      :profile="profile" @profile-change="emitProfileChange" @change-error="emitError"
+    />
+    <AccountSettings v-show="optionActive === 'Account Settings'" 
+      :profile="profile" @profile-change="emitChange" @change-error="emitError"
+    />
+    <WishlistComponent v-show="optionActive === 'Wishlist'" :user="profile" @remove-wish="onRemoveWish" @hide-error="showError"/>
+    <div style="display: flex; flex-wrap: wrap;" v-show="optionActive === 'Rent Ads'">
+      <template v-if="rentAds && rentAds.length > 0">
+        <RentComponent style="width: 340px;" v-for="ad of rentAds" :rent="ad" :user="profile"
+          @hide-error="showError" @rent-hide="rentHide"
+        />
+      </template>
+      <template v-else>You don't have any ad</template>
+    </div>
   </div>
 </template>
 
@@ -18,6 +30,8 @@ import { ref } from 'vue';
 import AccountSettings from './AccountSettings.vue';
 import ProfileSettings from './ProfileSettings.vue';
 import WishlistComponent from './WishlistComponent.vue';
+import RentComponent from '../../components/RentComponent.vue'
+import axios from 'axios';
 
 let props = defineProps({
   profile: Object
@@ -25,15 +39,16 @@ let props = defineProps({
 
 let emits = defineEmits({
   'profile-change': null,
-  'account-change': null,
+  'profile-props-change': null,
   'remove-wish': (id) => typeof id === 'number',
+  'change-error': null,
+  'hide-error': null
 })
 
 let optionActive = ref('Profile Settings'); 
 
-console.log(optionActive);
 
-let settings = ['Profile Settings', 'Account Settings', 'Wishlist']
+let settings = ['Profile Settings', 'Account Settings', 'Wishlist', 'Rent Ads']
 
 function changeActive(name) {
   optionActive.value = name;
@@ -43,21 +58,42 @@ function emitChange(obj) {
   emits('profile-change', obj);
 }
 
-function emitAccountChange(obj) {
-  emits('account-change', obj);
+function emitError() {
+  emits('change-error');
 }
+
+function emitProfileChange(obj) {
+  emits('profile-props-change', obj);
+} 
 
 function onRemoveWish(id) {
   emits('remove-wish', id);
 } 
 
+let rentAds = ref(null);
+
+axios.get('/booking/your-ads').then(({ data }) => {
+  rentAds.value = data;
+})
+
+function showError() {
+  emits('hide-error');
+}
+
+function rentHide(id) {
+  for(let ad of rentAds.value) {
+    if(ad.id == id) { ad.is_hidden = !ad.is_hidden; break; }
+  }
+}
 </script>
 
 <style lang="scss">
 .profileRightContainer {
+  overflow-y: auto;
+  max-height: calc(100vh - 150px);
   display: flex;
   flex-direction: column;
-  padding: 80px 80px 40px 80px;
+  padding: 40px 40px 40px 40px;
 }
 .settingsChoose {
   display: flex;

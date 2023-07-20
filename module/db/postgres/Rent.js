@@ -29,7 +29,8 @@ export default class Rent {
     return new Promise((resolve, reject) => {
       this.client.query(
         `SELECT users.username AS user_name, rental_properties.* FROM users 
-        INNER JOIN rental_properties ON users.id = rental_properties.user_id`,
+        INNER JOIN rental_properties ON users.id = rental_properties.user_id
+        WHERE is_hidden = false`,
         [],
         (err, result) => {
           if (err) reject(err);
@@ -81,7 +82,7 @@ export default class Rent {
     for (let wish of wishlist) {
       wishArray.push(await this.getWish(wish));
     }
-    return wishArray;
+    return wishArray.filter((elem) => !elem.is_hidden);
   }
   getRentUser(id) {
     return new Promise((resolve, reject) => {
@@ -154,5 +155,45 @@ export default class Rent {
         }
       );
     });
+  }
+  getAds(id) {
+    return new Promise((resolve, reject) => {
+      this.client.query(`SELECT * FROM rental_properties WHERE user_id = $1`, [id], (err, result) => {
+        if(err) reject(err);
+        else resolve(result.rows);
+      })
+    })
+  }
+  getVisibleAds(id) {
+    return new Promise((resolve, reject) => {
+      this.client.query(`SELECT * FROM rental_properties WHERE user_id = $1 AND is_hidden = false`, [id], (err, result) => {
+        if(err) reject(err);
+        else resolve(result.rows)
+      })
+    })
+  }
+  hideRent(id, isHidden) {
+    return new Promise((resolve, reject) => {
+      this.client.query(`UPDATE rental_properties SET is_hidden = $1 WHERE id = $2`, [isHidden, id], (err, result) => {
+        if(err) reject(err);
+        else resolve(result);
+      })
+    })
+  }
+  hideUserRent(id) {
+    return new Promise((resolve, reject) => {
+      this.client.query(`UPDATE rental_properties SET is_hidden = true WHERE user_id = $1`, [id], (err, result) => {
+        if(err) reject(err);
+        else resolve(result);
+      })
+    })
+  }
+  getCoords(id) {
+    return new Promise((resolve, reject) => {
+      this.client.query(`SELECT address FROM rental_properties WHERE id = $1`, [id], (err, result) => {
+        if(err) reject(err);
+        else resolve(JSON.parse(result.rows[0].address).coords);
+      })
+    })
   }
 }

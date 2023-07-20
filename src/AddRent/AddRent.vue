@@ -29,7 +29,7 @@
 import axios from 'axios';
 
 import { computed, ref } from 'vue';
-import UpperLine from '../Profile/components/UpperLine.vue';
+import UpperLine from '../components/UpperLine.vue';
 
 import FirstStep from './components/FirstStep.vue'; 
 import SecondStep from './components/SecondStep.vue';

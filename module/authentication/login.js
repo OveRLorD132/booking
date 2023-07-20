@@ -2,16 +2,15 @@ import UserRepostitory from "../db/postgres/Users.js";
 
 let userRepostitory = new UserRepostitory();
 
-import Password from "../Password/Password.js";
+import bcrypt from 'bcrypt';
 
 export default async function login(username, password, done) {
     try {
         let user = await userRepostitory.getByUsername(username);
-        console.log(user);
+        if(!user) return done(0, false, { message: `This user doesn't exist`}) 
         try {
-            console.log(password);
-            let match = Password.prototype.comparePassword(password, user.password);
-            if(!match) return done(0, false, {message: 'Incorrect password.'});
+            let match = await bcrypt.compare(password, user.password);
+            if(!match) return done(0, false, {message: 'Incorrect password'});
             if(match) {
                 delete user.password;
                 return done(0, user);
@@ -20,6 +19,6 @@ export default async function login(username, password, done) {
             return done(err);
         }
     } catch(err) {
-        return done(0, false, {message: `This user doesn't exist.`});
+        return done(0, false, {message: `Internal server error`});
     }
 }

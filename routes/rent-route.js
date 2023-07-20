@@ -19,19 +19,30 @@ import Complains from "../module/db/postgres/Complains.js";
 let complains = new Complains();
 
 import complainUserCheck from "../module/middlewares/complain-user-check.js";
+import rentHiddenCheck from "../module/middlewares/rent-hidden-check.js";
+import commentUserCheck from "../module/middlewares/comment-user-check.js";
+
+import Comments from "../module/db/postgres/Comments.js";
+
+let comments = new Comments();
 
 let rent = new Rent();
 
 let router = Router();
 
-router.get('/booking/rent/:rentId', async(req, res) => {
+router.get('/booking/rent/:rentId', rentHiddenCheck, async(req, res) => {
     res.render('rent');
 })
 
 router.get('/booking/rent/:rentId/rent', async(req, res) => {
     try {
         let result = await rent.getRentById(req.params.rentId);
-        res.send(result);
+        if(req.user && req.user.id == result.user_id) res.send(result);
+        else if(result.is_hidden) {
+            res.status(403);
+            res.send('Error! No Access');
+        }
+        else res.send(result);
     } catch(err) {
         console.error(err);
     }
@@ -57,54 +68,97 @@ router.patch('/rent/change-images', authCheck.authCheckClient, rentUserCheck, as
 })
 
 router.patch('/rent/change-properties', authCheck.authCheckClient, rentUserCheck, async(req, res) => {
-    let { addressLine, description, header, price, type} = req.body;
+    let { rent_id, address, description, header, price, type} = req.body;
     try {
-        validator.validateAddress(addressLine);
-    } catch(err) {
-        req.flash('error', err);
-        addressLine = "";
-    }
-    try {
-        validator.validateDescription(description);
-    } catch(err) {
-        req.flash('error', err);
-        description = "";
-    }
-    try {
-        validator.validateHeader(header);
-    } catch(err) {
-        req.flash('error', err);
-        header = "";
-    }
-    try {
-        validator.validatePrice(price);
-    } catch(err) {
-        req.flash('error', err);
-        price = "";
-    }
-    try {
-        validator.validateType(type);
-    } catch(err) {
-        req.flash('error', err);
-        type = "";
-    }
-    let doneObj = {};
-    try {
-        await rentChange({addressLine, description, header, price, type}, req.body.rent_id, doneObj);
-        res.status(200);
-        res.send(doneObj);
-        req.flash('success', 'Change successful.');
-        return;
-    } catch(err) {
-        if(err.message === 'Invalid input.') {
-            req.flash('error', err.message);
-        } else {
-            req.flash('error', `Something's went wrong. Bad request.`);
+        if(!address) {
+            res.status(500);
+            res.send('Error');
+            return;
         }
-        res.status(500);
-        res.send(doneObj);
+        validator.validateAddress(address.addressLine);
+        validator.validateCountry(address.country);
+        validator.validateCity(address.city);
+        validator.validateIndex(address.postIndex);
+        validator.validateDescription(description);
+        validator.validateHeader(header);
+        validator.validatePrice(price);
+        validator.validateType(type);
+        let changeObj = {
+            address: {
+                addressLine: address.addressLine,
+                country: address.country,
+                city: address.city,
+                postIndex: address.postIndex,
+                coords: await rent.getCoords(req.body.rent_id) 
+            },
+            description,
+            header,
+            price,
+            type
+        }
+        try {
+
+            for(let key in changeObj) {
+                await rent.changeRentProperty(key, changeObj[key], rent_id);
+            }
+            res.status(200);
+            req.flash('success', 'Properties Changed Successfully');
+            res.send(changeObj);
+        } catch(err) {
+            res.status(500);
+            req.flash('error', 'Internal Server Error');
+            res.send('Internal Server Error');
+            return;
+        }
+    } catch(err) {
+        res.status(400);
+        req.flash('error', err);
+        res.send('Validation Error');
+        return;
     }
 
+})
+
+router.patch('/rent/comment/edit', authCheck.authCheckClient, commentUserCheck, async (req, res) => {
+    try {
+        try {
+            if(!req.body.id || !req.body.text || !req.body.rating) throw new Error('Field is empty');
+            if(req.body.text.length > 500) throw new Error('Comment is too long');
+            if (!/^\d+(\.\d{1,2})?$/.test(req.body.rating)) throw new Error('Invalid format.');
+            if(req.body.rating <= 0) throw new Error('Rating must be greater than zero');
+            if(req.body.rating > 5) throw new Error('Too big num');
+        } catch(err) {
+            res.status(400);
+            req.flash('error', err);
+            res.send('Validation Error');
+            return;
+        }
+        await comments.editComment(req.body.text, req.body.id, req.body.rating);
+        res.status(200);
+        req.flash('success', 'Comment edited successfully');
+        res.send('Success');
+    } catch(err) {
+        res.status(500);
+        req.flash('error', 'Internal server error');
+        res.send('Error');
+    }
+})
+
+router.patch('/rent/hide', authCheck.authCheckClient, rentUserCheck, async (req, res) => {
+    try {
+        if(req.user.type === 'Guest') {
+            res.status(403);
+            res.send('Error');
+            return;
+        }
+        await rent.hideRent(req.body.rent_id, req.body.isHidden);
+        res.status(200);
+        res.send('Success');
+    } catch(err) {
+        res.status(400);
+        req.flash('error', 'Internal server error');
+        res.send('Error');
+    }
 })
 
 router.post('/rent/new-complain', authCheck.authCheckClient, complainUserCheck, async(req, res) => {
@@ -115,6 +169,45 @@ router.post('/rent/new-complain', authCheck.authCheckClient, complainUserCheck, 
         res.send('Success');
     } catch(err) {
         res.status(400);
+        req.flash('error', 'Internal server error');
+        res.send('Error');
+    }
+})
+
+router.post('/rent/comment/new', authCheck.authCheckClient, async (req, res) => {
+    try {
+        try {
+            if(!req.body.rent_id && !req.body.text && !req.body.rating) throw new Error('All fields must not be empty');
+            if(req.body.text.length > 500) throw new Error('Comment is too long');
+            if (!/^\d+(\.\d{1,2})?$/.test(req.body.rating)) throw new Error('Invalid format.');
+            if(req.body.rating <= 0) throw new Error('Rating must be greater than zero');
+            if(req.body.rating > 5) throw new Error('Too big num');
+        } catch(err) {
+            res.status(400);
+            req.flash('error', err);
+            res.send('Validation Error');
+            return;
+        }
+        let id = await comments.addComment(req.body.rent_id, req.body.rating, req.body.text, req.user.id);
+        let comment = await comments.getComment(id);
+        res.status(200);
+        req.flash('success', 'Comment added successfully');
+        res.send(comment);
+    } catch(err) {
+        res.status(500);
+        req.flash('error', 'Internal server error');
+        res.send('Error');
+    }
+})
+
+router.delete('/rent/comment/delete', authCheck.authCheckClient, commentUserCheck, async (req, res) => {
+    try {
+        await comments.deleteComment(req.body.id);
+        res.status(200);
+        req.flash('success', 'Comment deleted successfully');
+        res.send('Success');
+    } catch(err) {
+        res.status(500);
         req.flash('error', 'Internal server error');
         res.send('Error');
     }

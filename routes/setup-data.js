@@ -5,6 +5,7 @@ import Rent from "../module/db/postgres/Rent.js";
 let rent = new Rent();
 
 import StaticPhotos from "../module/serve-static/rent-photos.js";
+import authCheck from "../module/middlewares/auth-check.js";
 
 let staticPhotos = new StaticPhotos();
  
@@ -38,9 +39,23 @@ router.get('/short-wishlist', async(req, res) => {
         res.status(500);
         res.send('Error');
         return;
-    } 
+    } else if(!req.user.wishlist) {
+        res.send(null);
+        return;
+    }
     let result = await rent.getShortWishlist(req.user.wishlist);
     res.send(result);
+})
+
+router.get('/booking/your-ads', authCheck.authCheckClient, async (req, res) => {
+    try {
+        let ads = await rent.getAds(req.user.id);
+        res.status(200);
+        res.send(ads);
+    } catch(err) {
+        res.status(400);
+        req.flash('error', '')
+    }
 })
 
 export default router;

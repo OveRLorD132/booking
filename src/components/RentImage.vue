@@ -7,15 +7,16 @@
             <img src="/images/wished.png" class="wishListButton" 
               v-if="user && user.wishlist && user.wishlist.includes(+rent.id)" @click="removeFromWishlist"
             />
+            <img src="/images/hide.png" class="hide-btn" v-if="user.id == rent.user_id && !rent.is_hidden" @click="hideAd"/>
             <img src="/images/imgButton.png" class="next" v-if="page < images_count - 1" @click.stop="nextPage"/>
             <img src="/images/imgButton.png" class="back" v-if="page > 0" @click.stop="back"/>
         </div>
+        <img src="/images/hide.png" class="hide-btn" v-if="rent.is_hidden" @click="hideAd"/>
         <a class="rentLink" :href="rentLink">
             <div class="imagesContainer" :style="{transform: `translateX(${-page * 340}px)`}">
                 <div class="rentImageContainer" v-for="num in images_count">
                     <img class="rentImage" :src="`/rent-photos/${rent.id}/` + (num - 1) + '.png'"/>
                 </div>
-                
             </div>
         </a>
     </div>
@@ -40,6 +41,8 @@ axios.get(`/photos-count/${props.rent.id}`).then(({data}) => {
 let emits = defineEmits({
     'to-wish': (id) => typeof id === 'number',
     'remove-wish': (id) => typeof id ==='number', 
+    'hide-rent': null,
+    'hide-error': null
 })
 
 let rentLink = ref(`/booking/rent/${props.rent.id}`);
@@ -71,6 +74,16 @@ function toWishList() {
 function removeFromWishlist() {
     emits('remove-wish', props.rent.id);
 }
+
+async function hideAd() {
+    try {
+        await axios.patch('/rent/hide', { rent_id: props.rent.id, isHidden: !props.rent.is_hidden});
+        emits('hide-rent', props.rent.id);
+    } catch(err) {
+        emits('hide-error');
+    }
+}
+
 
 </script>
 
@@ -143,5 +156,15 @@ function removeFromWishlist() {
     display: flex;
     transition: all .1s;
     flex-direction: row;
+}
+
+.hide-btn {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 10;
 }
 </style>

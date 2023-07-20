@@ -43,7 +43,7 @@
 }
 
 .done-btn:hover {
-  background-color: $button-hover-grey;
+  background-color: $calendar-grey;
 }
 
 .btn-link {

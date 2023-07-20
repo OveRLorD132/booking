@@ -1,108 +1,105 @@
 <template>
-  <div class="mainSettingsContainer">
-    <div class="settingsContainer">
-      <PropertyComponent :name="'E-mail'" :value="profile.email" :is-editing="isEditing" @value-changed="emailChange"/>
-      <PropertyComponent :name="'Country'" :value="profile.country" :is-editing="isEditing" @value-changed="countryChange"/>
-      <PropertyComponent :name="'Phone Number'" :value="profile.phone_number" :is-editing="isEditing" @value-changed="phoneChange"/>
-      <div class="property">
-        <div class="passwordLabel">Password</div>
-        <a class="changeLink" href="/profile/change-password">Change password</a>
+  <div class="propertiesContainer" v-if="profile">
+    <div class="propertyContainer">
+      <div class="propertyColumn">
+        <PropertyComponent :name="'Username'" :value="profile.username" 
+          @change-error="emitError" @value-changed="emitsChange" 
+        />
+        <PropertyComponent :name="'Gender'" :value="profile.gender" 
+          @change-error="emitError" @value-changed="emitsChange" 
+        />
+        <PropertyComponent :name="'Phone Number'" :value="profile.phone_number" 
+          @change-error="emitError" @value-changed="emitsChange" 
+        />
+        <div class="property">
+          <div class="passwordLabel">Password</div>
+          <a class="changeLink" href="/profile/change-password">Change password</a>
+        </div>
       </div>
-    </div>
-    <div class="buttons">
-      <div class="editButton" @click="editProperties">{{isEditing ? 'Exit' : 'Edit Profile'}}</div>
-      <div class="saveChangesButton" v-if="isEditing" @click="saveChanges">Save Changes</div>
+      <div class="propertyColumn">
+        <PropertyComponent :name="'First Name'" :value="profile.first_name" 
+          @change-error="emitError" @value-changed="emitsChange" 
+        />
+        <PropertyComponent :name="'Birth Date'" :value="profile.birth_date" 
+          @change-error="emitError" @value-changed="emitsChange" 
+        />
+        <PropertyComponent :name="'E-mail'" :value="profile.email" 
+          @change-error="emitError" @value-changed="emitsChange" 
+        />
+      </div>
+      <div class="propertyColumn">
+        <PropertyComponent :name="'Last Name'" :value="profile.last_name" 
+          @change-error="emitError" @value-changed="emitsChange" 
+        />
+        <PropertyComponent :name="'Join Date'" :value="profile.join_date" />
+        <PropertyComponent :name="'Country'" :value="profile.country" 
+          @change-error="emitError" @value-changed="emitsChange" 
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-
-import validator from '../../../module/user-properties-change/validation';
-
 import PropertyComponent from './PropertyComponent.vue';
-import axios from 'axios';
 
 let props = defineProps({
   profile: Object
 })
 
 let emits = defineEmits({
-  'account-change': null
+  'profile-change': null,
+  'change-error': null
 })
 
-let isEditing = ref(false);
-
-function editProperties() {
-  isEditing.value = !isEditing.value;
+function emitsChange(obj) {
+  emits('profile-change', obj);
 }
 
-function emailChange(email) {
-  editedEmail.value = email;
-}
-
-function countryChange(country) {
-  editedCountry.value = country;
-}
-
-function phoneChange(phone) {
-  editedPhoneNumber.value = phone;
-}
-
-let editedEmail = ref(null);
-
-let editedCountry = ref(null);
-
-let editedPhoneNumber = ref(null);
-
-async function saveChanges() {
-  let email, country, phone_number;
-  try {
-    validator.validateEmail(editedEmail.value);
-    email = editedEmail.value;
-  } catch {
-    email = "";
-  }
-  try {
-    validator.validateCountry(editedCountry.value);
-    country = editedCountry.value;
-  } catch {
-    country = "";
-  }
-  try {
-    validator.validatePhoneNumber(editedPhoneNumber.value);
-    phone_number = editedPhoneNumber.value;
-  } catch {
-    phone_number = "";
-  }
-  if(!country && !email && !phone_number) {
-    isEditing.value = false;
-    return;
-  }
-  try {
-    let result = await axios.patch('/profile/change-account-data', {email, country, phone_number}); 
-    if(result.status === 200) emits('account-change', result.data);
-    isEditing.value = false;
-  } catch(err) {
-    console.error(err);
-    isEditing.value = false;
-  }
+function emitError() {
+  emits('change-error');
 }
 </script>
 
 <style lang="scss">
-.mainSettingsContainer {
+@import '../../../public/stylesheets/inputs.scss';
+@import '../../../public/stylesheets/colors.scss';
+
+.propertiesContainer {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+  width: 800px;
 }
-.passwordLabel {
-  margin-bottom: 10px;
+
+.propertyContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
-.changeLink {
-  text-decoration: underline;
-  color: #86E9CE;
+
+.editButton {
+  @include profile-buttons;
+  text-align: center;
+  background-color: $dialog-blue;
+  &:hover {
+    background-color: $button-hover-blue;
+  }
+  min-width: 50px;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.saveChangesButton {
+  @include profile-buttons;
+  background-color: $button-red;
+  &:hover {
+    background-color: $button-hover-red;
+  }
 }
 </style>

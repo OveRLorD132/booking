@@ -137,5 +137,8 @@ function addMarker(event) {
   right: 0;
   padding: 10px 10px 10px 10px;
   font-size: 18px;
+  &:hover {
+    background-color: $button-hover-red;
+  }
 }
 </style>

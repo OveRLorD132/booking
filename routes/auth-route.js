@@ -2,11 +2,12 @@ import express from "express";
 
 import passport from '../module/authentication/passport-config.js';
 
-import registration from "../module/authentication/registration.js";
+import bcrypt from 'bcrypt';
 
 import validation from "../module/user-properties-change/validation.js";
 
 import Users from "../module/db/postgres/Users.js";
+import authCheck from "../module/middlewares/auth-check.js";
 
 let users = new Users();
 
@@ -18,6 +19,13 @@ router.get('/registration', (req, res) => {
 
 router.get('/login', (req, res) => {
     res.render('Login');
+})
+
+router.get('/logout', authCheck.authCheckBrowser, async (req, res) => {
+    req.logout((err) => {
+        if(err) req.flash('error', 'Error During Logging Out');
+        res.redirect('/login');
+    })
 })
 
 router.post('/login', passport.authenticate('local', {
@@ -57,9 +65,40 @@ router.post('/registration', async (req, res, next) => {
         validation.validateType(type);
         validation.validateCountry(country);
         validation.validateDescription(description);
-        let result = await users.createProfile(registrationObj)
-        console.log(result);
-        res.send(result);
+        try {
+            password = await bcrypt.hash(password, 11);
+        } catch(err) {
+            res.status(500);
+            req.flash('Internal Server Error');
+            res.send('Error');
+            return;
+        }
+        registrationObj = { 
+            first_name, 
+            last_name,
+            username, 
+            email, 
+            password, 
+            gender, 
+            phone, 
+            birth_date, 
+            type, 
+            country, 
+            description
+        }
+        let object = await users.createProfile(registrationObj)
+        req.login(object, (err) => {
+            if(err) {
+                req.flash('error', 'Internal Server Error');
+                res.status(500);
+                res.send('Internal Server Error');
+                return;
+            } else {
+                res.status(200);
+                res.send('Success');
+                return;
+            }
+        });
     } catch(err) {
         req.flash('error', err.message)
         res.status(400);

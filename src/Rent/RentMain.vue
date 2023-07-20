@@ -8,7 +8,7 @@
 <script setup>
 import axios from 'axios';
 
-import UpperLine from '../Profile/components/UpperLine.vue';
+import UpperLine from '../components/UpperLine.vue';
 
 import { ref } from 'vue';
 

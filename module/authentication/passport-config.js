@@ -12,12 +12,12 @@ passport.use(new Strategy((username, password, done) => {
 }));
 
 passport.serializeUser(({ id }, done) => {
-    console.log(id);
     done(0, id);
 });
 
 passport.deserializeUser(async(id, done) => {
     let user = await userRepostitory.getById(id);
+    delete user.password;
     done(0, user);
 })
 

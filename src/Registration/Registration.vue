@@ -15,7 +15,7 @@
 <script setup>
 import axios from 'axios';
 import { ref, watch } from 'vue';
-import UpperLine from '../Profile/components/UpperLine.vue';
+import UpperLine from '../components/UpperLine.vue';
 import FlashMessages from '../components/FlashMessages.vue';
 import BottomLine from '../components/BottomLine.vue';
 
@@ -28,7 +28,7 @@ import SixthStep from './components/SixthStep.vue';
 
 let flashMessages = ref([]);
 
-let step = ref(6);
+let step = ref(1);
 
 let first_name = ref(null);
 
@@ -144,10 +144,12 @@ async function stepNext() {
                     description: description.value
                 }
                 try {
-                    let response = await axios.post('/registration', registrationObject);
+                    let result = await axios.post('/registration', registrationObject);
+                    console.log(result);
                     step.value++;
                 } catch(err) {
-                    console.error(err);
+                    console.log(err);
+                    flashMessages.value = await axios.get('/flash-messages');
                 }
             }
             break;

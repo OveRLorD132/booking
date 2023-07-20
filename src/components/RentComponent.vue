@@ -1,7 +1,9 @@
 <template>
     <div class="rentContainer">
         <div class="mainImage">
-            <RentImage @to-wish="onToWish" @remove-wish="onRemoveWish" :directory="imageDirectory" :rent="rent" :user="user"/>
+            <RentImage @to-wish="onToWish" @remove-wish="onRemoveWish" :directory="imageDirectory" 
+              :rent="rent" :user="user" @hide-error="emitError" @hide-rent="emitHide"
+            />
         </div>
         <div class="rentDescription">
             <a class="rentLink" href="/booking/rent">
@@ -32,6 +34,8 @@ let props = defineProps({
 let emits = defineEmits({
     'to-wish': (id) => typeof id === 'number',
     'remove-wish': (id) => typeof id ==='number', 
+    'rent-hide': null,
+    'hide-error': null
 })
 
 let imageDirectory = ref(`/rent-photos/${props.rent.user_name + props.rent.user_id}/${props.rent.id}/`);
@@ -43,6 +47,14 @@ function onToWish(id) {
 
 function onRemoveWish(id) {
     emits('remove-wish', id);
+}
+
+function emitHide(id) {
+    emits('rent-hide', id);
+}
+
+function emitError() {
+    emits('hide-error');
 }
 </script>
 

@@ -24,7 +24,7 @@ import axios from 'axios';
 let socket = io();
 import Rent from './module/Rent';
 import RentComponent from '../components/RentComponent.vue';
-import UpperLine from '../Profile/components/UpperLine.vue';
+import UpperLine from '../components/UpperLine.vue';
 
 import { ref } from 'vue';
 

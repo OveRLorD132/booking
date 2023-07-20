@@ -10,7 +10,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import UpperLine from '../Profile/components/UpperLine.vue';
+import UpperLine from '../components/UpperLine.vue';
 
 import ConversationsList from './components/ConversationsList.vue';
 import ConversationComponent from './components/ConversationComponent.vue';
@@ -26,6 +26,10 @@ socket.on('name-change-result', (conversation) => {
 
 let user = ref(null);
 
+let url = new URL(window.location.href);
+
+let params = new URLSearchParams(url.search);
+
 axios.get('/booking/user-profile').then(({ data }) => {
   user.value = data;
 })
@@ -34,12 +38,19 @@ let conversations = ref(null);
 
 axios.get('/conversations/load').then(({ data }) => {
   conversations.value = data;
+  let id = params.get('id');
+  for(let conv of conversations.value) {
+    if(conv.id == id) shownConversation.value = conv;
+  }
 })
 
 let shownConversation = ref(null);
 
 function showConversation(conversation) {
   shownConversation.value = conversation;
+  params.set('id', conversation.id);
+  url.search = params.toString();
+  history.replaceState(null, null, url.href);
 }
 </script>
 

@@ -9,13 +9,15 @@
         </div>
       </div>
     </transition-group>
-    <div class="flashMessage errorMessage" v-for="message in errors">
-      <img class="flashImage" src="/images/error.png" />
-      <div class="flashInfoContainer">
-        <div class="flashLabel">Error</div>
-        <div class="successInfo">{{ message }}</div>
+    <transition-group name="flash-show">
+      <div class="flashMessage errorMessage" v-for="message in errors">
+        <img class="flashImage" src="/images/error.png" />
+        <div class="flashInfoContainer">
+          <div class="flashLabel">Error</div>
+          <div class="successInfo">{{ message }}</div>
+        </div>
       </div>
-    </div>
+    </transition-group>
     <div class="flashMessage infoMessage" v-for="message in info">
       <img class="flashImage" src="/images/info.png" />
       <div class="flashInfoContainer">
@@ -40,7 +42,6 @@ let success = ref([]);
 let info = ref([]);
 
 watch(props, (newProp) => {
-  console.log(newProp);
   if(newProp.messages) {
     if (newProp.messages.error) {
       for (let message of newProp.messages.error) {
@@ -56,22 +57,10 @@ watch(props, (newProp) => {
       for (let message of newProp.messages.info) {
         info.value.push(message);
       }
-    }
-    if(errors.value && errors.value.length) {
-      for(let i = 0; i < errors.value.length; i++) {
-        setTimeout(errors.value.splice(i, 1), 10000);
-      }
-    }
-    if(success.value && success.value.length) {
-      for(let i = 0; i < success.value.length; i++) {
-        setTimeout(() => success.value.splice(i, 1), 10000);
-      }
-    }
-    if(info.value && info.value.length) {
-      for(let i = 0; i < info.value.length; i++) {
-        setTimeout(info.value.splice(i, 1), 10000);
-      }
-    }
+    } 
+    if(errors.value && errors.value.length) setTimeout(() => errors.value = [], 10000);
+    if(success.value && success.value.length) setTimeout(() => success.value = [], 10000);
+    if(info.value && info.value.length) setTimeout(() => info.value = [], 10000);
   }
 })
 </script>

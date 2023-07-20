@@ -1,18 +1,18 @@
 function validateUsername(username) {
-  if(!username) return;
+  if(!username) throw new Error(`This field mustn't be empty`);
   if(username.length < 8) throw new Error('Username must be at least 8 symbols.');
   if(username.length > 20) throw new Error('Your username is too long.');
   return;
 }
 
 function validateFirstName(first_name) {
-  if(!first_name) return;
+  if(!first_name) throw new Error(`This field mustn't be empty`);
   if(first_name.length >= 100) throw new Error('Your name is too long.');
   return;
 }
 
 function validateLastName(last_name) {
-  if(!last_name) return;
+  if(!last_name) throw new Error(`This field mustn't be empty`);
   if(last_name.length >= 100) throw new Error('Your name is too long.');
   return;
 }
@@ -23,7 +23,7 @@ function validateGender(gender) {
 }
 
 function validateEmail(email) {
-  if(!email) return;
+  if(!email) throw new Error(`This field mustn't be empty`);
   if(!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) throw new Error('Invalid email format.');
   if(email.length > 50) throw new Error('Email is too long.');
   return;
@@ -48,12 +48,13 @@ import passwordCheck from './password-check.js';
 
 function validatePassword(password) {
   if(password.length > 20) throw new Error('Password is too long.'); 
-  if(passwordCheck(passwordCheck) === 'Weak') throw new Error('Your password is too weak.')
+  if(passwordCheck(password) === 'Weak') throw new Error('Your password is too weak.')
   return;
 }
 
-function validateDescription(description) {
-  if(!description) return;
+function validateDescription(description, type) {
+  if(!description && type === 'Guest') return;
+  if(!description && type === 'Host') throw new Error(`This field is obligatory for hosts`);
   if(description.length > 250) throw new Error('Description is too long. 250 symbols is maximum.');
   return;
 }

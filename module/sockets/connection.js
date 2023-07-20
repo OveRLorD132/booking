@@ -6,20 +6,16 @@ let conversations = new Conversations();
 
 export default function (socket, io) {
   socket.on("online", async () => {
-    if (
-      socket.request.session.passport &&
+    joinUserRoom(socket);
+    usersOnline[socket.id] = socket.request.session.passport.user;
+    let userConversations = await conversations.loadConversations(
       socket.request.session.passport.user
-    ) {
-      usersOnline[socket.id] = socket.request.session.passport.user;
-      let userConversations = await conversations.loadConversations(
+    );
+    for (let conv of userConversations)
+      io.to(`Conversation_${conv.id}`).emit(
+        "user-online",
         socket.request.session.passport.user
       );
-      for (let conv of userConversations)
-        io.to(`Conversation_${conv.id}`).emit(
-          "user-online",
-          socket.request.session.passport.user
-        );
-    }
   });
   socket.on("disconnect", async () => {
     if (
@@ -50,4 +46,11 @@ export default function (socket, io) {
     }
     socket.emit("user-online", false);
   });
+}
+
+
+function joinUserRoom(socket) {
+  let userRooms = Array.from(socket.rooms).filter((elem) => elem !== socket.id);
+  let userRoom = userRooms.filter((elem) => /^User_/.test(elem));
+  if(userRoom.length === 0) socket.join(`User_${socket.request.session.passport.user}`);
 }

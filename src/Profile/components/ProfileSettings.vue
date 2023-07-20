@@ -1,149 +1,126 @@
 <template>
-  <div class="propertiesContainer" v-if="profile">
-    <div class="propertyContainer">
-      <div class="propertyColumn">
-        <PropertyComponent :name="'User Name'" :value="profile.username" :is-editing="isEditing"
-          @value-changed="changeUsername" />
-        <PropertyComponent :name="'Gender'" :value="profile.gender" :is-editing="isEditing"
-          @value-changed="genderChange" />
+  <div class="mainSettingsContainer">
+    <div class="settingsContainer">
+      <div class="property" style="border-bottom: 3px solid #FF2F69;">
+        <div class="propertyLabel">Type</div>
+        <div class="propertyValue" v-if="!isEditing">{{ profile.type }}</div>
+        <select class="option-select" style="width: 250px;" v-if="isEditing" v-model="editedType">
+          <option class="prop-option">Guest</option>
+          <option class="prop-option">Host</option>
+        </select>
       </div>
-      <div class="propertyColumn">
-        <PropertyComponent :name="'First Name'" :value="profile.first_name" :is-editing="isEditing"
-          @value-changed="firstNameChange" />
-        <PropertyComponent :name="'Birthdate'" :value="profile.birth_date" />
+      <div class="property" style="width: 550px;">
+        <div class="propertyLabel" style="margin-bottom: 10px;">Description</div>
+        <div class="account-description" v-if="!isEditing">{{ profile.description }}</div>
+        <textarea v-if="isEditing" class="description-edit" v-model="editedDescription"></textarea>
+        <div class="edit-error">{{ descriptionError }}</div>
       </div>
-      <div class="propertyColumn">
-        <PropertyComponent :name="'Last Name'" :value="profile.last_name" :is-editing="isEditing"
-          @value-changed="lastNameChange" />
-        <PropertyComponent :name="'Joined Date'" :value="profile.join_date" />
-      </div>
+      <a class="profile-link" :href="`/public-profile/${profile.id}`">My Public Profile</a>
     </div>
     <div class="buttons">
-      <div class="editButton" @click="editProperties">{{ isEditing ? 'Exit' : 'Edit Profile' }}</div>
+      <div class="editButton" @click="editProperties">{{isEditing ? 'Exit' : 'Edit Profile'}}</div>
       <div class="saveChangesButton" v-if="isEditing" @click="saveChanges">Save Changes</div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, watch } from 'vue';
+import validation from '../../../module/user-properties-change/validation';
 import axios from 'axios';
 
-import validation from '../../../module/user-properties-change/validation';
-import PropertyComponent from './PropertyComponent.vue';
-
-import { ref } from 'vue';
-
-let editedFirstName = ref(null);
-
-let editedLastName = ref(null);
-
-let editedUsername = ref(null);
-
-let editedGender = ref(null);
-
 let isEditing = ref(false);
+
+let editedType = ref(props.profile.type);
+
+let editedDescription = ref(props.profile.description);
+
+function editProperties() {
+  isEditing.value = !isEditing.value;
+}
 
 let props = defineProps({
   profile: Object
 })
 
 let emits = defineEmits({
-  'profile-change': null
+  'profile-change': null,
+  'change-error': null
 })
 
-function editProperties() {
-  isEditing.value = !isEditing.value;
-}
+let descriptionError = ref('');
 
-function lastNameChange(newName) {
-  editedLastName.value = newName;
-}
+watch(editedDescription, (newValue) => {
+  try {
+    validation.validateDescription(newValue, editedType.value);
+    descriptionError.value = '';
+  } catch(err) {
+    console.log(err);
+    descriptionError.value = err.message;
+  }
+})
 
-function firstNameChange(newName) {
-  editedFirstName.value = newName;
-}
-
-function changeUsername(newUsername) {
-  editedUsername.value = newUsername;
-}
-
-function genderChange(newGender) {
-  editedGender.value = newGender;
-}
+watch(editedType, (newValue) => {
+  try {
+    validation.validateDescription(editedDescription.value, newValue);
+    descriptionError.value = '';
+  } catch(err) {
+    descriptionError.value = err.message;
+  }
+})
 
 async function saveChanges() {
-  let username, first_name, last_name, gender;
+  if(descriptionError.value) return;
   try {
-    validation.validateUsername(editedUsername.value);
-    username = editedUsername.value;
-  } catch {
-    username = "";
+    await axios.patch('/profile/change-settings', {type: editedType.value, description: editedDescription.value});
+    emits('profile-change', {type: editedType.value, description: editedDescription.value});
+  } catch(err) {
+    emits('change-error');
   }
-  try {
-    validation.validateFirstName(editedFirstName.value)
-    first_name = editedFirstName.value;
-  } catch {
-    first_name = "";
-  }
-  try {
-    validation.validateLastName(editedLastName.value);
-    last_name = editedLastName.value;
-  } catch {
-    last_name = "";
-  }
-  try {
-    validation.validateGender(editedGender.value);
-    gender = editedGender.value;
-  } catch {
-    gender = "";
-  }
-  if(!username && !first_name && !last_name && !gender) {
-    isEditing.false;
-    return;
-  }
-  try {
-    let { data } = await axios.patch('/profile/change-profile', {username, first_name, last_name, gender});
-    emits('profile-change', data);
-    isEditing.value = false;
-  } catch (err) {
-    console.error(err);
-    isEditing.value = false;
-  }
+  isEditing.value = false;
 }
 </script>
 
 <style lang="scss">
-@import '../../../public/stylesheets/inputs.scss';
 @import '../../../public/stylesheets/colors.scss';
 
-.propertiesContainer {
+.mainSettingsContainer {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
-  width: 800px;
+}
+.passwordLabel {
+  margin-bottom: 10px;
+}
+.changeLink {
+  text-decoration: underline;
+  color: $button-blue;
 }
 
-.propertyContainer {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+.account-description {
+  font-size: 15px;
+  max-width: 550px;
+  word-wrap: break-word;
 }
 
-.editButton {
-  @include profile-buttons;
-  text-align: center;
-  background-color: #86E9CE;
-  min-width: 50px;
+.description-edit {
+  border-radius: 10px;
+  border: 2px solid $calendar-grey;
+  width: 550px;
+  padding: 10px;
+  height: 250px;
+  resize: none;
+  font-family: 'Roboto';
+  font-size: 15px;
 }
 
-.buttons {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+.profile-link {
+  margin-left: 10px;
+  font-size: 18px;
+  color: $dialog-blue;
+  &:hover {
+    text-decoration: underline;
+  }
 }
-
-.saveChangesButton {
-  @include profile-buttons;
-  background-color: $button-red;
-}</style>
+</style>

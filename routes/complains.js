@@ -25,4 +25,21 @@ router.get('/complains/load', authCheck.authCheckClient, adminCheck.adminCheckCl
   }
 })
 
+router.delete('/complains/delete', authCheck.authCheckClient, adminCheck.adminCheckClient, async (req, res) => {
+  try {
+    if(await complains.deleteComplain(req.body.id)) {
+      res.status(200);
+      res.send('Delete Success');
+    } else {
+      res.status(404);
+      req.flash('error', `This complain doesn't exist`);
+      res.send('Error');
+    }
+  } catch(err) {
+    res.status(400);
+    req.flash('error', 'Internal Server Error');
+    res.send('Error');
+  }
+})
+
 export default router;
