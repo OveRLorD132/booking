@@ -4,11 +4,13 @@ let conversations = new Conversations();
 
 import Messages from "../db/postgres/Messages.js";
 
-let messages = new Messages();
-
 export default function (socket, io) {
   socket.on("new-message", async (message) => {
     if (message.sender_id === message.receiver_id) return;
+    if(message.text.length > 300) {
+      socket.emit('message-error', `Message is too long`);
+      return;
+    }
     if (
       socket.request.session.passport &&
       socket.request.session.passport.user
@@ -29,9 +31,10 @@ export default function (socket, io) {
           socket.request.session.passport.user,
           message.receiver_id
         );
+        conversation = await conversations.getConversationById(conversation);
         socket.emit("conv-check-result", conversation);
       }
-      message = await messages.addMessage(
+      message = await Messages.prototype.addMessage(
         message.text,
         socket.request.session.passport.user,
         conversation.id
@@ -52,7 +55,7 @@ export default function (socket, io) {
         conversation.user1_id === socket.request.session.passport.user ||
         conversation.user2_id === socket.request.session.passport.user
       ) {
-        let loadedMessages = await messages.loadMessages(conv_id);
+        let loadedMessages = await Messages.prototype.loadMessages(conv_id);
         let conversationRooms = Array.from(socket.rooms).filter(
           (elem) => elem !== socket.id
         );
@@ -71,7 +74,7 @@ export default function (socket, io) {
       let rooms = Array.from(socket.rooms).filter((elem) => elem !== socket.id);
       let conversationRoom = rooms.filter((elem) => /Conversation/.test(elem));
       let conversation_id = conversationRoom[0].replace("Conversation_", "");
-      message = await messages.addMessage(
+      message = await Messages.prototype.addMessage(
         message,
         socket.request.session.passport.user,
         conversation_id
@@ -108,12 +111,37 @@ export default function (socket, io) {
       socket.request.session.passport.user
     ) {
       try {
-        let id = await messages.getMessage(message.id);
+        if(!message.text || message.text.trim() === '') {
+          socket.emit('message-error', `Message mustn't be empty`);
+          return;
+        } if(message.text.length > 300) {
+          socket.emit('message-error', `Message is too long`);
+          return;
+        }
+        let id = await Messages.prototype.getMessage(message.id);
         if (id === socket.request.session.passport.user) {
-          await messages.editMessage(message.id, message.text)
+          await Messages.prototype.editMessage(message.id, message.text)
           let rooms = Array.from(socket.rooms).filter((elem) => elem !== socket.id);
           let conversationRoom = rooms.filter((elem) => /Conversation/.test(elem));
           io.to(conversationRoom[0]).emit('message-change-result', message);
+        } else return;
+      } catch(err) {
+        console.error(err);
+      }
+    }
+  })
+  socket.on('message-delete', async (id) => {
+    if (
+      socket.request.session.passport &&
+      socket.request.session.passport.user
+    ) {
+      try {
+        let user_id = await Messages.prototype.getMessage(id);
+        if (user_id === socket.request.session.passport.user) {
+          await Messages.prototype.deleteMessage(id);
+          let rooms = Array.from(socket.rooms).filter((elem) => elem !== socket.id);
+          let conversationRoom = rooms.filter((elem) => /Conversation/.test(elem));
+          io.to(conversationRoom[0]).emit('message-delete-result', id);
         } else return;
       } catch(err) {
         console.error(err);

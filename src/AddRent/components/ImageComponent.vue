@@ -71,6 +71,8 @@ function deleteImage() {
 </script>
 
 <style scoped lang="scss">
+@import '../../../public/stylesheets/colors.scss';
+
 .image {
     object-position: center;
     object-fit: cover;
@@ -85,13 +87,16 @@ function deleteImage() {
     background-color: #ffffff;
     font-size: 16px;
     padding-top: 10px;
-    padding-left: 10px;
-    padding-right: 10px;
     border-radius: 10px;
+    padding-bottom: 10px;
 }
 
 .panelElement {
-    margin-bottom: 10px;
+    padding: 5px 10px 5px 10px;
+    cursor: pointer;
+    &:hover {
+        background-color: $calendar-grey;
+    }
 }
 .moreButtonImage {
     top: 10px;

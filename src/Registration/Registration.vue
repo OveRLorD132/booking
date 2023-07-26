@@ -28,7 +28,7 @@ import SixthStep from './components/SixthStep.vue';
 
 let flashMessages = ref([]);
 
-let step = ref(1);
+let step = ref(6);
 
 let first_name = ref(null);
 
@@ -145,7 +145,6 @@ async function stepNext() {
                 }
                 try {
                     let result = await axios.post('/registration', registrationObject);
-                    console.log(result);
                     step.value++;
                 } catch(err) {
                     console.log(err);

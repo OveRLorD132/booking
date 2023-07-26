@@ -6,6 +6,10 @@ import { createServer } from 'http';
 
 import { sessionMiddleware } from './module/authentication/session.js';
 
+import postgresConnect from './module/db/postgres/postgres-connect.js';
+
+postgresConnect();
+
 import authRoute from './routes/auth-route.js';
 import mainRouter from './routes/main.js';
 import usersRouter from './routes/users.js';
@@ -16,6 +20,7 @@ import profileRouter from './routes/profile-route.js';
 import complainsRouter from './routes/complains.js';
 import conversationsRouter from './routes/conversations.js';
 import publicProfileRouter from './routes/public-profile.js';
+import passwordChangeRouter from './routes/password-change.js';
 
 let app = express();
 
@@ -48,6 +53,7 @@ app.use(profileRouter);
 app.use(conversationsRouter);
 app.use(complainsRouter);
 app.use(publicProfileRouter);
+app.use(passwordChangeRouter);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
@@ -57,12 +63,14 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
+  if(err.message === 'Not Found') res.render('Error404');
+  else res.render('Error500');
   // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  // res.locals.message = err.message;
+  // res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  // res.status(err.status || 500);
+  // res.render('error');
 });
 

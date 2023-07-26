@@ -119,7 +119,6 @@ function scrollLeft() {
 }
 
 function scrollRight() {
-  console.log(adsCont.value.scrollLeft);
   adsCont.value.scrollLeft += adsCont.value.offsetWidth * 0.6;
 }
 

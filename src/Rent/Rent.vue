@@ -79,7 +79,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="ratingLabel">{{ rent.rating }}: {{ comments.length }}
+                    <div class="ratingLabel"><img class="rating-img" src="/images/rating.png"/>{{ rent.rating }}: {{ comments.length }}
                         {{ comments.length !== 1 ? 'comments' : 'comment' }}</div>
                 </div>
             </div>
@@ -128,7 +128,7 @@
                     </div>
                 </div>
             </div>
-            <MapComponent :coords="rent.address.coords" :rent="rent" v-if="rent.address.coords || editIsVisible"
+            <MapComponent :coords="rent.address.coords" :rent="rent" :user="user" v-if="rent.address.coords || editIsVisible"
                 @new-marker="setMarker" />
             <div class="host-info">
                 <h2 class="host-info-label">About host</h2>
@@ -163,11 +163,9 @@ import { useRouter, useRoute } from 'vue-router';
 import io from 'socket.io-client';
 let socket = io();
 import AllImages from './components/AllImages.vue';
-import CommentInput from './components/CommentInput.vue';
 import CommentComponent from '../components/CommentComponent.vue';
 import ImagesComponent from './components/ImagesComponent.vue';
 
-import Comment from './module/Comment';
 import MapComponent from './components/MapComponent.vue';
 
 import validator from '../../module/rent-change/rent-validation';
@@ -200,7 +198,11 @@ let emits = defineEmits({
 
 onMounted(() => {
     rent.value = props.rent;
-    console.log(props);
+    if(!rent.value) return;
+    socket.value.emit('load-request', rent.value.id);
+    axios.get(`/load-photos?id=${rent.value.id}`).then(({ data }) => {
+        images.value = data.map((file) => 'data:image/jpeg;base64,' + file)
+    })
 })
 
 watch(() => props.user, (newValue) => {
@@ -209,8 +211,6 @@ watch(() => props.user, (newValue) => {
     }
 })
 
-console.log(route);
-
 let images = ref(null);
 
 let editIsVisible = ref(false);
@@ -218,7 +218,9 @@ let editIsVisible = ref(false);
 watch(() => props.rent, (newValue) => {
     console.log(props.rent);
     rent.value = newValue;
-    socket.value.emit('load-request', rent.value.id);
+    axios.get('/rent/comments/load', { rent_id: props.rent.id}).then(({ data }) => {
+        comments.value = data;
+    })
     if (props.user) {
         if (rent.value.user_id == props.user.id) editIsVisible.value = true;
     }
@@ -227,29 +229,6 @@ watch(() => props.rent, (newValue) => {
     })
 })
 
-socket.value.on('load-result', (response) => {
-    for (let comment of response) {
-        comment = new Comment(comment);
-        comments.value.push(comment);
-    }
-})
-
-socket.value.on('add-result', (comment) => {
-    comment = new Comment(comment);
-    comments.value.push(comment);
-    calculateAvg();
-})
-
-socket.value.on('edit-result', (obj) => {
-    for (let comment of comments.value) {
-        if (obj.id === comment.id) comment.editComment(obj.text, obj.rating);
-    }
-    calculateAvg();
-})
-socket.value.on('delete-result', (index) => {
-    comments.value.splice(index, 1);
-    calculateAvg();
-})
 
 function showAllImages() {
     console.log(props);
@@ -532,6 +511,7 @@ async function submitCommentEdit(obj) {
                 comment.rating = obj.rating;
             }
         }
+        calculateAvg();
     } catch {} finally {
         messages.value = await axios.get('/flash-messages');
     }
@@ -543,8 +523,10 @@ async function deleteComment(id) {
         for(let comment of comments.value) {
             if(comment.id == id) comments.value.splice(comments.value.indexOf(comment), 1);
         }
+        calculateAvg();
     } catch {} finally {
         messages.value = await axios.get('/flash-messages');
+
     }
 }
 
@@ -631,6 +613,7 @@ async function submitComment() {
         if(rating.value > 5) return;
         let comment = await axios.post('/rent/comment/new', {rent_id: props.rent.id, rating: rating.value, text: enteredComment.value});
         comments.value.push(comment.data);
+        calculateAvg();
     } catch(err) {}
     messages.value = await axios.get('/flash-messages');
     hideInput();
@@ -710,6 +693,11 @@ async function submitComment() {
     justify-content: space-between;
     align-items: center;
     align-self: flex-start;
+}
+
+.ratingLabel {
+    display: flex;
+    align-items: center;
 }
 
 .user-image {
@@ -1000,6 +988,13 @@ async function submitComment() {
     background-color: #fff;
     display: flex;
     flex-direction: column;
+}
+
+.rating-img {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    margin-bottom: 3px;
 }
 </style>
 

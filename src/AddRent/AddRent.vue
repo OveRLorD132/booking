@@ -117,7 +117,6 @@ function setPrice(newPrice) {
 let nextStep = () => {
     switch (step.value) {
         case 1: 
-        console.log(rent_type);
             if(!rent_type.value) return;
             step.value++;
             return;
@@ -126,7 +125,8 @@ let nextStep = () => {
             step.value++;
             return;
         case 3: 
-            if(!address.value.country || !address.value.addressLine) return;
+            if(!address.value.country || !address.value.addressLine 
+              || address.value.city === 'Invalid' || address.value.postIndex === 'Invalid') return;
             step.value++;
             return;
         case 4:
@@ -135,7 +135,7 @@ let nextStep = () => {
             break;
         case 5: 
             if(rent_type.value && address.value && images.value.length >= 5 && description.value && header.value 
-            && price.value && typeof +price.value === 'number') {
+            && price.value) {
                 setRent(rent_type.value, address.value, images.value, description.value, header.value, price.value);
                 step.value++;
             }
@@ -194,7 +194,7 @@ let fifthStep = computed(() => {
 })
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 @import '../../public/stylesheets/inputs.scss';
 .mainContainer {
     overflow-x: hidden;
@@ -243,6 +243,9 @@ let fifthStep = computed(() => {
 .nextButton {
     @include button-style;
     margin-right: 30px;
+    &:hover {
+        background-color: $button-hover-red;
+    }
 }
 
 .backButton {
@@ -253,5 +256,10 @@ let fifthStep = computed(() => {
     font-family: 'Proxima-Nova';
     border-radius: 10px;
     cursor: pointer;
+}
+
+.error-text {
+    color: $error-red;
+    font-size: 20px;
 }
 </style>

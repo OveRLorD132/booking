@@ -90,7 +90,6 @@ async function processUpload(file) {
   reader.onload = (event) => {
     uploadedFile.value = event.target.result;
     nextTick(() => {
-      console.log(uploadedFile.value);
       cropper.value = new Cropper(userImage.value, {
         aspectRatio: 1,
         viewMode: 1,

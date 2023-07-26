@@ -22,7 +22,9 @@
                 />
             </div>
         </div>
-        <input :style="{display: 'none'}" id="imgInput" type="file" @change="handleFileUpload" multiple/>
+        <input :style="{display: 'none'}" id="imgInput" type="file" @change="handleFileUpload" 
+          accept="image/jpeg, image/png, image/webp" multiple
+        />
     </div>
 </template>
 
@@ -56,7 +58,7 @@ let handleFileDrop = (e) =>{
     e.preventDefault()
     let images = e.dataTransfer.files;
     for(let image of images) {
-        processUploadedFiles(image);
+        if(image.type === 'image/webp' || image.type === 'image/png' || image.type === 'image/jpeg') processUploadedFiles(image);
     }
 }
 
@@ -153,6 +155,9 @@ function deleteImage(index) {
 
 .inputButton {
     @include button-style;
+    &:hover {
+        background-color: $button-hover-red;
+    }
     display: flex;
     align-items: center;
     border-radius: 10px;

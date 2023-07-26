@@ -38,8 +38,8 @@
         <img class="pick-img" src="/images/choose-arrow.png"/>
       </div>
       <div class="registration-error">{{ dateError }}</div>
-      <div class="clear-btn" @click="clearDate">Clear</div>
-      <CalendarComponent @date-picked="onDatePicked" v-if="calendarIsVisible"/>
+      <CalendarComponent @date-picked="onDatePicked" v-if="calendarIsVisible" style="position: relative; top: 0;"/>
+      <div class="clear-btn" v-if="date && date !== 'Not selected'" @click="clearDate">Clear</div>
     </div>
   </div>
 </template>
@@ -55,7 +55,7 @@ let gender = ref('Not selected');
 
 let phoneNumber = ref(null);
 
-let date = ref('Not chosen');
+let date = ref('Not selected');
 
 let calendarIsVisible = ref(false);
 
@@ -124,7 +124,7 @@ watch(phoneNumber, (newVal) => {
 let dateError = ref(null);
 
 watch(date, (newDate) => {
-  if (newDate === 'Not chosen') emits('date-input', '');
+  if (newDate === 'Not selected') emits('date-input', '');
   else if (!newDate) emits('date-input', '');
   else {
     try {
@@ -159,7 +159,7 @@ function onDatePicked(newDate) {
 }
 
 function clearDate() {
-  date.value = 'Not chosen';
+  date.value = 'Not selected';
 }
 </script>
 
@@ -197,5 +197,6 @@ function clearDate() {
   padding: 10px 10px 10px 10px;
   margin-top: 15px;
   border-radius: 10px;
+  cursor: pointer;
 }
 </style>

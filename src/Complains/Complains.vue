@@ -130,7 +130,6 @@ let acceptedComplaint = ref(null);
 let dialogIsVisible = ref(false);
 
 function showDialog(complaint) {
-  console.log(complaint);
   acceptedComplaint.value = complaint;
   dialogIsVisible.value = true;
 }

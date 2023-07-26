@@ -1,7 +1,10 @@
 <template>
+  <title>{{ conversation ? conversation.name ? 
+    conversation.name + ' - Conversation' : conversation.user1_id != user.id 
+    ? conversation.user1_name + ' - Conversation' : conversation.user2_name + ' - Conversation' : 'My Conversations' }}
+  </title>
   <div class="conversation-container" v-if="conversation">
-    <title>{{ conversation.user1_id != user.id ? conversation.user1_name : conversation.user2_name }} - Conversation</title>
-    <div class="messages-container" ref="messagesCont">
+    <div class="conversations-messages-container" ref="messagesCont">
       <div class="conv-user-info">
         <img class="conv-user-avatar" 
           :src="`/profile-images/${conversation.user1_id != user.id ? conversation.user1_id : conversation.user2_id}.png`" 
@@ -18,7 +21,7 @@
         </div>
       </div>
       <MessageComponent v-for="message in messages" @message-changed="changeMessage" :message="message" :user="user"
-        :socket="socket" @scroll="handleRead(message)" />
+        :socket="socket" @scroll="handleRead(message)" @message-delete="messageDelete"/>
       <div class="message-input-cont">
         <form @submit.prevent="sendMessage">
           <input placeholder="Type a message ..." class="message-input" type="text" v-model="newMessage" />
@@ -81,6 +84,12 @@ props.socket.on('message-change-result', (message) => {
   }
 })
 
+props.socket.on('message-delete-result' , (id) => {
+  for(let m of messages.value) {
+    if(id === m.id) messages.value.splice(messages.value.indexOf(m), 1);
+  }
+})
+
 let newMessage = ref(null);
 
 function sendMessage() {
@@ -100,6 +109,10 @@ watch(() => props.conversation, () => {
 function changeMessage(message) {
   props.socket.emit('message-changed', message);
 }
+
+function messageDelete(id) {
+  props.socket.emit('message-delete', id);
+}
 </script>
 
 <style lang="scss">
@@ -110,15 +123,16 @@ function changeMessage(message) {
   position: relative;
 }
 
-.messages-container {
-  height: calc(100vh - 230px);
+.conversations-messages-container {
+  height: calc(100vh - 137px);
   overflow-y: auto;
-  margin-bottom: 60px;
-  margin-top: 90px;
   display: flex;
   flex-direction: column;
 }
 
+.description {
+  word-break: break-all;
+}
 
 .message-input-cont {
   display: flex;
@@ -153,7 +167,8 @@ function changeMessage(message) {
 
 .conv-user-info {
   background-color: #FFF;
-  position: absolute;
+  position: sticky;
+  z-index: 1;
   top: 0;
   width: 100%;
   padding: 10px 0 10px 0;

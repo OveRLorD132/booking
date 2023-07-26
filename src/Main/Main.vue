@@ -19,16 +19,11 @@
 </template>
 
 <script setup>
-import io from 'socket.io-client';
 import axios from 'axios';
-let socket = io();
-import Rent from './module/Rent';
 import RentComponent from '../components/RentComponent.vue';
 import UpperLine from '../components/UpperLine.vue';
 
 import { ref } from 'vue';
-
-socket = ref(socket);
 
 let filterComponents = ref(['Apartments', 'House', 'Room', 'Villa', 'Penthouse', 'Duplex', 'Guesthouse']);
 
@@ -40,22 +35,21 @@ let loadProfile = (userObj) => {
 
 let rentList = ref([]);
 
+axios.get('/booking/load-rent').then(({ data }) => {
+    for(let rent of data) {
+        rentList.value.push(rent);
+    }
+    filteredRent.value = rentList.value;
+})
+
 let filteredRent = ref([]);
 
-socket.value.on('load-list', (list) => {
-    for (let rent of list) {
-        rent = new Rent(rent);
-        rentList.value.push(rent);
-        filteredRent.value.push(rent);
-    }
-})
 
 async function onToWish(id) {
     try {
         await axios.patch('/booking/to-wish', { id: id, user_id: user.value.id });
         if (!user.value.wishlist) user.value.wishlist = [];
         user.value.wishlist.push(+id);
-        console.log(user)
     } catch (err) {
         console.error(err);
     }
@@ -67,7 +61,6 @@ async function onRemoveWish(id) {
         for (let i = 0; i < user.value.wishlist.length; i++) {
             if (user.value.wishlist[i] == id) user.value.wishlist.splice(i, 1);
         }
-        console.log(user)
     } catch (err) {
         console.error(err);
     }

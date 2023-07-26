@@ -34,7 +34,6 @@ let emits = defineEmits({
 let shortWishlist = ref([]);
 
 axios.get('/short-wishlist').then(({ data }) => {
-  console.log(data);
   shortWishlist.value = data;
 })
 

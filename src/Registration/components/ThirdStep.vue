@@ -1,21 +1,47 @@
 <template>
   <div class="third-step-container">
     <div class="registration-input-container">
-      <div class="registration-label password-label">Password</div>
-      <input type="password" class="register-input" v-model="password"/>
-      <div class="strength-line">
-        <div class="weak-line" v-if="passStrength"/>
-        <div class="medium-line" v-if="passStrength === 'Medium' || passStrength === 'Strong'"/>
-        <div class="strong-line" v-if="passStrength === 'Strong'"/>
+      <div class="registration-label password-label">Password
+        <div class="strength-block" v-if="passStrength"
+          :style="{ color: passStrength === 'Weak' ? '#b3070d' : passStrength === 'Medium' ? '#ffcd2a' 
+          : passStrength === 'Strong' ? '#0ba60b' : ''}"
+        >
+          {{ passStrength }}
+          <div class="strength-bar-container">
+            <div class="strength-bar"
+              :style="{ width: passStrength === 'Weak' ? '33%' : passStrength === 'Medium' ? '66%' 
+              : passStrength === 'Strong' ? '100%' : '',
+              backgroundColor: passStrength === 'Weak' ? '#b3070d' : passStrength === 'Medium' ? '#ffcd2a' 
+              : passStrength === 'Strong' ? '#0ba60b' : ''}"
+            >
+          </div>
+          </div>
+        </div>
       </div>
-      <div class="strength-label" :style="{color: passStrength === 'Strong' ? '#0ba60b' 
-      : passStrength === 'Medium' ? '#ffcd2a' : '#b3070d', 
-      marginLeft: passStrength === 'Strong' ? '233px' : passStrength === 'Medium' ? '103px' : ''}">{{ passStrength }}</div>
+      <div class="input-cont">
+        <input :type="isPasswordHidden ? 'text' : 'password'" class="register-input" v-model="password"
+          @focus="fieldFocus('password')" @blur="fieldBlur"
+        />
+        <img class="show-btn"
+          :src="!isPasswordHidden && focusedField === 'password'? `/images/hide-password-focused.png`
+          : isPasswordHidden && focusedField === 'password' ? `/images/show-password-focused.png`
+          : !isPasswordHidden && focusedField !== 'password' ? `/images/hide-password.png`
+          : `/images/show-password.png`" @click="showPassword"/>
+      </div>
       <div class="registration-error">{{ passwordError }}</div>
     </div>
     <div class="registration-input-container">
       <div class="registration-label confirm-label">Confirm Password</div>
-      <input type="password" class="register-input" v-model="passwordConfirm"/>
+      <div class="input-cont">
+        <input :type="confirmIsHidden ? 'text' : 'password'" class="register-input" v-model="passwordConfirm"
+          @focus="fieldFocus('confirm')" @blur="fieldBlur"
+        />
+        <img class="show-btn"
+          :src="!confirmIsHidden && focusedField === 'confirm'? `/images/hide-password-focused.png`
+          : confirmIsHidden && focusedField === 'confirm' ? `/images/show-password-focused.png`
+          : !confirmIsHidden && focusedField !== 'confirm' ? `/images/hide-password.png`
+          : `/images/show-password.png`" @click="showConfirm"/>
+      </div>
       <div class="registration-error">{{ confirmationError }}</div>
     </div>
   </div>
@@ -71,33 +97,67 @@ watch(passwordConfirm, () => {
   }
 
 })
+
+let isPasswordHidden = ref(false);
+
+function showPassword() {
+  isPasswordHidden.value = !isPasswordHidden.value;
+}
+
+let confirmIsHidden = ref(false);
+
+function showConfirm() {
+  confirmIsHidden.value = !confirmIsHidden.value;
+}
+
+let focusedField = ref(null);
+
+function fieldFocus(field) {;
+  focusedField.value = field;
+}
+
+function fieldBlur() {
+  focusedField.value = null;
+}
 </script>
 
 <style lang="scss">
-.strength-line {
-  display: flex;
-  flex-direction: row;
-}
+@import '../../../public/stylesheets/colors.scss';
 
-.strength-label {
+.strength-block {
   font-size: 18px;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  position: absolute;
+  right: 15px;
 }
 
-.weak-line {
-  height: 4px;
-  width: 100px;
-  background-color: #b3070d;
+.strength-bar-container {
+  margin-left: 10px;
+  width: 80px;
+  height: 8px;
+  border-radius: 5px;
+  background-color: $border-grey;
 }
 
-.medium-line {
-  height: 4px;
-  width: 130px;
-  background-color: #ffcd2a;
+.strength-bar {
+  transition: width .7s ease-out;
+  border-radius: 5px;
+  height: 100%;
 }
 
-.strong-line {
-  height: 4px;
-  width: 170px;
-  background-color: #0ba60b;
+.input-cont {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.show-btn {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
 }
 </style>

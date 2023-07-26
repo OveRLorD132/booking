@@ -1,9 +1,12 @@
 <template>
   <div class="main-cont">
     <UpperLine />
+    <FlashMessages :messages="messages" />
+    <div id="modalContainer"></div>
     <div class="app-cont">
-      <ConversationsList :socket="socket" :user="user" :conversations="conversations" @conversation-pick="showConversation"/>
-      <ConversationComponent :socket="socket" :user="user" :conversation="shownConversation"/>
+      <ConversationsList :socket="socket" :user="user" :conversations="conversations"
+        @conversation-pick="showConversation" />
+      <ConversationComponent :socket="socket" :user="user" :conversation="shownConversation" />
     </div>
   </div>
 </template>
@@ -11,6 +14,8 @@
 <script setup>
 import { ref } from 'vue';
 import UpperLine from '../components/UpperLine.vue';
+import FlashMessages from '../components/FlashMessages.vue';
+
 
 import ConversationsList from './components/ConversationsList.vue';
 import ConversationComponent from './components/ConversationComponent.vue';
@@ -22,6 +27,12 @@ let socket = io();
 
 socket.on('name-change-result', (conversation) => {
   for(let c of conversations.value) if(c.id == conversation.id) c.name = conversation.name;
+})
+
+let messages = ref([]);
+
+socket.on('message-error', (text) => {
+  messages.value = {'error': [text]};
 })
 
 let user = ref(null);
@@ -39,6 +50,7 @@ let conversations = ref(null);
 axios.get('/conversations/load').then(({ data }) => {
   conversations.value = data;
   let id = params.get('id');
+  if(!id) return;
   for(let conv of conversations.value) {
     if(conv.id == id) shownConversation.value = conv;
   }

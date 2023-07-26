@@ -1,9 +1,8 @@
 import pgk from 'pg';
 
-let { Client } = pgk;
+let { Pool } = pgk;
 
-export default async () => {
-    let client = new Client({user: 'postgres', password: 'password', database: 'booking'})
-    await client.connect();
-    return client;
+export default function() {
+    globalThis.DbClient = new Pool({user: 'postgres', password: 'password', database: 'booking'})
+    globalThis.DbClient.connect();
 }

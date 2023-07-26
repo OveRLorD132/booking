@@ -3,8 +3,8 @@ import __dirname from "./dirname.js";
 import path from 'path';
 
 export default {
-    mode: 'development',
-    entry: './src/PublicProfile/publicProfile.js',
+    mode: 'production',
+    entry: './src/Rent/rent.js',
     cache: {
         type: 'filesystem',
         allowCollectingMemory: true,
@@ -15,8 +15,8 @@ export default {
         splitChunks: false,
     },
     output: {
-        path: path.resolve(__dirname, 'public', 'javascripts', 'PublicProfile'),
-        filename: 'publicProfile.js',
+        path: path.resolve(__dirname, 'public', 'javascripts', 'Rent'),
+        filename: 'rent.js',
         clean: true,
     },
     module: {

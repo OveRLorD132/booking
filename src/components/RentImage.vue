@@ -7,7 +7,7 @@
             <img src="/images/wished.png" class="wishListButton" 
               v-if="user && user.wishlist && user.wishlist.includes(+rent.id)" @click="removeFromWishlist"
             />
-            <img src="/images/hide.png" class="hide-btn" v-if="user.id == rent.user_id && !rent.is_hidden" @click="hideAd"/>
+            <img src="/images/hide.png" class="hide-btn" v-if="user && user.id == rent.user_id && !rent.is_hidden" @click="hideAd"/>
             <img src="/images/imgButton.png" class="next" v-if="page < images_count - 1" @click.stop="nextPage"/>
             <img src="/images/imgButton.png" class="back" v-if="page > 0" @click.stop="back"/>
         </div>
@@ -34,7 +34,6 @@ let props = defineProps({
 let images_count = ref(null);
 
 axios.get(`/photos-count/${props.rent.id}`).then(({data}) => {
-    console.log(data);
     images_count.value = data;
 })
 

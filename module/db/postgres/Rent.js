@@ -1,16 +1,4 @@
-import pgk from "pg";
-
-let { Client } = pgk;
-
 export default class Rent {
-  constructor() {
-    this.client = new Client({
-      user: "postgres",
-      password: "password",
-      database: "booking",
-    });
-    this.client.connect();
-  }
   addRent(object) {
     let keys = Object.keys(object);
     let values = Object.values(object);
@@ -19,7 +7,7 @@ export default class Rent {
       ", "
     )}) VALUES (${placeholders}) RETURNING id`;
     return new Promise((resolve, reject) => {
-      this.client.query(query, values, (err, result) => {
+      globalThis.DbClient.query(query, values, (err, result) => {
         if (err) reject(err);
         else resolve(result.rows[0]);
       });
@@ -27,7 +15,7 @@ export default class Rent {
   }
   loadList() {
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         `SELECT users.username AS user_name, rental_properties.* FROM users 
         INNER JOIN rental_properties ON users.id = rental_properties.user_id
         WHERE is_hidden = false`,
@@ -41,7 +29,7 @@ export default class Rent {
   }
   getRentById(id) {
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         `SELECT users.first_name AS first_name, users.description AS user_description, users.join_date as join_date, rental_properties.*, 
         COALESCE((SELECT AVG(rating) FROM comments WHERE rent_id = $1), 5) AS rating 
         FROM users
@@ -64,13 +52,12 @@ export default class Rent {
   }
   getWish(id) {
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         `SELECT rental_properties.*, users.first_name FROM rental_properties 
         INNER JOIN users ON rental_properties.user_id = users.id
         WHERE rental_properties.id = $1`,
         [id],
         (err, result) => {
-          console.log(result);
           if (err) reject(err);
           else resolve(result.rows[0]);
         }
@@ -86,7 +73,7 @@ export default class Rent {
   }
   getRentUser(id) {
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         `SELECT user_id FROM rental_properties WHERE id = $1`,
         [id],
         (err, result) => {
@@ -98,7 +85,7 @@ export default class Rent {
   }
   changeRentProperty(propertyName, propertyValue, id) {
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         `UPDATE rental_properties SET ${propertyName} = $1 WHERE id = $2`,
         [propertyValue, id],
         (err, result) => {
@@ -110,7 +97,7 @@ export default class Rent {
   }
   changeAddressLine(id, addressLine) {
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         `SELECT address FROM rental_properties WHERE id = $1`,
         [id],
         (err, result) => {
@@ -134,7 +121,7 @@ export default class Rent {
   }
   changeCoords(coords, id) {
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         `SELECT address FROM rental_properties WHERE id = $1`,
         [id],
         (err, result) => {
@@ -143,7 +130,7 @@ export default class Rent {
             let address = result.rows[0].address;
             address = JSON.parse(address);
             address.coords = coords;
-            this.client.query(
+            globalThis.DbClient.query(
               `UPDATE rental_properties SET address = $1 WHERE id = $2`,
               [address, id],
               (err, result) => {
@@ -158,7 +145,7 @@ export default class Rent {
   }
   getAds(id) {
     return new Promise((resolve, reject) => {
-      this.client.query(`SELECT * FROM rental_properties WHERE user_id = $1`, [id], (err, result) => {
+      globalThis.DbClient.query(`SELECT * FROM rental_properties WHERE user_id = $1`, [id], (err, result) => {
         if(err) reject(err);
         else resolve(result.rows);
       })
@@ -166,7 +153,7 @@ export default class Rent {
   }
   getVisibleAds(id) {
     return new Promise((resolve, reject) => {
-      this.client.query(`SELECT * FROM rental_properties WHERE user_id = $1 AND is_hidden = false`, [id], (err, result) => {
+      globalThis.DbClient.query(`SELECT * FROM rental_properties WHERE user_id = $1 AND is_hidden = false`, [id], (err, result) => {
         if(err) reject(err);
         else resolve(result.rows)
       })
@@ -174,7 +161,7 @@ export default class Rent {
   }
   hideRent(id, isHidden) {
     return new Promise((resolve, reject) => {
-      this.client.query(`UPDATE rental_properties SET is_hidden = $1 WHERE id = $2`, [isHidden, id], (err, result) => {
+      globalThis.DbClient.query(`UPDATE rental_properties SET is_hidden = $1 WHERE id = $2`, [isHidden, id], (err, result) => {
         if(err) reject(err);
         else resolve(result);
       })
@@ -182,7 +169,7 @@ export default class Rent {
   }
   hideUserRent(id) {
     return new Promise((resolve, reject) => {
-      this.client.query(`UPDATE rental_properties SET is_hidden = true WHERE user_id = $1`, [id], (err, result) => {
+      globalThis.DbClient.query(`UPDATE rental_properties SET is_hidden = true WHERE user_id = $1`, [id], (err, result) => {
         if(err) reject(err);
         else resolve(result);
       })
@@ -190,7 +177,7 @@ export default class Rent {
   }
   getCoords(id) {
     return new Promise((resolve, reject) => {
-      this.client.query(`SELECT address FROM rental_properties WHERE id = $1`, [id], (err, result) => {
+      globalThis.DbClient.query(`SELECT address FROM rental_properties WHERE id = $1`, [id], (err, result) => {
         if(err) reject(err);
         else resolve(JSON.parse(result.rows[0].address).coords);
       })

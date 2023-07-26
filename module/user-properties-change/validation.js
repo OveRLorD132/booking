@@ -47,6 +47,7 @@ function validateCountry(country) {
 import passwordCheck from './password-check.js';
 
 function validatePassword(password) {
+  if(!password) throw new Error(`This field mustn't be empty`);
   if(password.length > 20) throw new Error('Password is too long.'); 
   if(passwordCheck(password) === 'Weak') throw new Error('Your password is too weak.')
   return;

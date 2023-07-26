@@ -2,6 +2,7 @@ import express from 'express';
 let router = express.Router();
 
 import UserRepostitory from '../module/db/postgres/Users.js';
+import Rent from '../module/db/postgres/Rent.js';
 let userRepository = new UserRepostitory();
 
 router.get('/', (req, res) => {
@@ -13,8 +14,18 @@ router.get('/main', (req, res) => {
 })
 
 router.get('/booking', (req, res) => {
-    console.log(req);
     res.render('main');
+})
+
+router.get('/booking/load-rent', async (req, res) => {
+    try {
+        let list = await Rent.prototype.loadList();
+        res.status(200).send(list.rows);
+    } catch(err) {
+        req.flash('Internal Server Error');
+        res.status(500);
+        res.send('Error');
+    }
 })
 
 router.patch('/booking/to-wish', async(req, res) => {
@@ -25,7 +36,7 @@ router.patch('/booking/to-wish', async(req, res) => {
         res.send('OK');
     } catch(err) {
         console.error(err);
-        res.status(400);
+        res.status(500);
         res.send('Error');
     }
 })
@@ -42,7 +53,7 @@ router.patch('/booking/remove-wish', async(req, res) => {
         res.send('OK');
     } catch(err) {
         console.error(err);
-        res.status(400);
+        res.status(500);
         res.send('Error');
     }
 })

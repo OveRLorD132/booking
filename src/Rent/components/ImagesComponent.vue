@@ -79,11 +79,6 @@ let props = defineProps({
     background-color: rgb(41, 41, 41, 0.5);
 }
 
-.fullImage {
-    max-width: 1000px;
-    max-height: 1000px;
-}
-
 .nextButton {
     @include imageButtons;
     transform: scaleX(-1);

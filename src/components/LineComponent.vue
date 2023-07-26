@@ -10,7 +10,6 @@ import axios from 'axios';
 let emit = defineEmits(['load-profile'])
 try {
     axios.get('/booking/user-profile').then(({ data }) => {
-        console.log(data);
         emit('load-profile', data);
     })
 } catch(err) {

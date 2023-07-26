@@ -1,8 +1,9 @@
 <template>
   <div class="notifications-container" id="notifications-container">
-    <template v-if="!notifications">
+    <template v-if="notifications">
       <div class="notification" v-for="notification of notifications">
         <img class="notification-image"
+          :style="{ backgroundColor: notification.type === 'complaint-receive' ? '#ffcd2a' : '#0ba60b'}"
           :src="notification.type === 'complaint-receive' ? '/images/warn.png' : '/images/accept.png'" />
         <div class="notification-right">
           <div class="notification-header">{{ notification.header }}</div>
@@ -43,7 +44,7 @@ socket.on('new-notification', (message) => {notifications.value.push(message); c
 @import '../../public/stylesheets/colors.scss';
 
 .notifications-container {
-  max-width: 200px;
+  max-width: 250px;
   flex-wrap: wrap;
   display: flex;
   position: absolute;
@@ -54,7 +55,7 @@ socket.on('new-notification', (message) => {notifications.value.push(message); c
 
 .notification {
   padding: 10px 10px 10px 10px;
-  max-width: 200px;
+  max-width: 250px;
   flex-wrap: wrap;
   display: flex;
   flex-direction: row;
@@ -64,6 +65,9 @@ socket.on('new-notification', (message) => {notifications.value.push(message); c
 .notification-image {
   width: 25px;
   height: 25px;
+  border-radius: 50%;
+  padding: 5px;
+  margin-right: 5px;
 }
 
 .notification-right {

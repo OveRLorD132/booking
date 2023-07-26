@@ -12,7 +12,10 @@
 import { Loader } from '@googlemaps/js-api-loader';
 import { ref } from 'vue';
 
+import googleApi from '../../module/google-api';
+
 let gMap = ref(null);
+
 
 let adress = ref(null);
 
@@ -25,7 +28,7 @@ let emits = defineEmits({
 })
 
 let loader = new Loader({
-        apiKey: 'AIzaSyD2WOGv4ca7LDKFt0lLP4hfKDUd-dzMoP4',
+        apiKey: googleApi,
         version: 'weekly',
         libraries: ['places']
     });
@@ -41,8 +44,6 @@ loader.load().then((google) => {
         });
     }
     initMap();
-
-    console.log(map);
 
     let autocomplete = new google.maps.places.Autocomplete(adressInput.value);
 

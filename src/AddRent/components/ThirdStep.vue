@@ -5,18 +5,22 @@
             <div class="addressLine firstLine">
                 Country
                 <input type="text" class="lineInput" placeholder="Enter country..." v-model="country"/>
+                <div class="error-text">{{ countryError }}</div>
             </div>
             <div class="addressLine firstLine">
                 Address
                 <input type="text" class="lineInput" placeholder="Enter address...." v-model="addressLine"/>
+                <div class="error-text">{{ lineError }}</div>
             </div>
             <div class="addressLine firstLine">
                 City
                 <input type="text" class="lineInput" placeholder="Enter city..." v-model="city"/>
+                <div class="error-text">{{ cityError }}</div>
             </div>
             <div class="addressLine">
                 Index
                 <input type="text" class="lineInput" placeholder="Enter index..." v-model="postIndex"/>
+                <div class="error-text">{{ indexError }}</div>
             </div>
         </div>
         <div class="useMapCont">
@@ -37,6 +41,9 @@
 import { ref, watch } from 'vue';
 
 import { Loader } from '@googlemaps/js-api-loader';
+import rentValidation from '../../../module/rent-change/rent-validation';
+
+import googleApi from '../../module/google-api';
 
 let props = defineProps({
     address: Array,
@@ -52,17 +59,69 @@ let emits = defineEmits({
 
 let addressLine = ref(null);
 
+let lineError = ref(null);
+
+watch(addressLine, (newValue) => {
+    try {
+        rentValidation.validateAddress(newValue);
+        emits('address-input', newValue);
+        lineError.value = null;
+    } catch(err) {
+        emits('address-input', '');
+        lineError.value = err;
+    }
+})
+
 let country = ref(null);
+
+let countryError = ref(null);
+
+watch(country, (newValue) => {
+    try {
+        rentValidation.validateCountry(newValue);
+        emits('country-input', newValue);
+        countryError.value = null;
+    } catch(err) {
+        emits('country-input', '');
+        countryError.value = err;
+    }
+})
 
 let city = ref(null);
 
+let cityError = ref(null);
+
+watch(city, (newValue) => {
+    try {
+        rentValidation.validateCity(newValue);
+        emits('city-input', newValue);
+        cityError.value = null;
+    } catch(err) {
+        emits('city-input', 'Invalid');
+        cityError.value = err;
+    } 
+})
+
 let postIndex = ref(null);
+
+let indexError = ref(null);
+
+watch(postIndex, (newValue) => {
+    try {
+        rentValidation.validateIndex(newValue);
+        emits('post-index-input', newValue);
+        indexError.value = null;
+    } catch(err) {
+        emits('post-index-input', 'Invalid');
+        indexError.value = err;
+    }
+})
 
 let isSwitched = ref(false);
 
 let map;
 
-let geocoder;
+let geocoder
 
 let marker;
 
@@ -73,7 +132,7 @@ watch(coords, (newValue) => {
 })
 
 let loader = new Loader({
-    apiKey: 'AIzaSyD2WOGv4ca7LDKFt0lLP4hfKDUd-dzMoP4',
+    apiKey: googleApi,
     version: 'weekly',
     libraries: ['places']
 })
@@ -104,7 +163,6 @@ function placeMarker(location) {
 }
 
 watch(props, (newValue) => {
-    console.log(newValue);
     let address = newValue.address;
     country.value = address.filter((component) => component.types[0] === 'country').map((component) => component.long_name);
     postIndex.value = address.filter((component) => component.types[0] === 'postal_code').map((component) => component.long_name);
@@ -113,22 +171,6 @@ watch(props, (newValue) => {
     addressLine.value =  addressLineComponents[1] && addressLineComponents[0] ? addressLineComponents[0] ?
         addressLineComponents[1].long_name + ', ' + addressLineComponents[0].long_name : 
         addressLineComponents[0].long_name :  "";
-})
-
-watch(addressLine, () => {
-    emits('address-input', addressLine.value)
-})
-
-watch(country, () => {
-    emits('country-input', country.value)
-})
-
-watch(city, () => {
-    emits('city-input', city.value)
-})
-
-watch(postIndex, () => {
-    emits('post-index-input', postIndex.value)
 })
 
 

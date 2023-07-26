@@ -28,7 +28,6 @@ let emits = defineEmits({
 let wishlist = ref(null)
 
 axios.get('/load-wishlist').then(({data}) => {
-  console.log(data);
   wishlist.value = data;
 })
 
@@ -37,12 +36,6 @@ watch(props.user.wishlist, (newValue) => {
     if(newValue.indexOf(+wish.id) === -1) wishlist.value.splice(wishlist.value.indexOf(wish), 1) 
   }
 },{deep: true})
-
-function deleteWish(id) {
-  for(let wish in wishlist.value) {
-    if(wish.id === id) wishlist.value.splice(wishlist.value.indexOf(wish), 1);
-  }
-}
 
 async function removeWish(id, index) {
   try {

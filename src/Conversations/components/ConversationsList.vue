@@ -1,5 +1,5 @@
 <template>
-  <div class="list-cont">
+  <div class="list-cont" v-if="user">
     <div class="conv-label">My Conversations</div>
     <div class="conversation-room" v-for="conversation in conversations" @click="chooseConversation(conversation)" :style="{
       borderColor: hoveredConversation === conversation ? '#FF2F69' : 'white',

@@ -10,7 +10,7 @@
       :style="{gridRow: index > 7 ? '3 / 3' : index > 3 ? '2 / 2' : ''}">{{ monthName }}</div>
     </div>
   </div>
-  <div class="day-calendar-container" v-if="chosenMonth !== undefined">
+  <div class="day-calendar-container" v-else>
     <h2 class="month-header">
       <div class="left-header" @click="calendarBack">
         <img class="back-btn" src="/images/return.png"/>
@@ -100,11 +100,9 @@ function generateCalendar() {
   }
   let previousMonthLength = new Date(previousMonthYear, previousMonth + 1, 0).getDate();
   let previousMonthStart = previousMonthLength - startingDay + 1;
-  console.log(previousMonthStart);
   for (let i = 0; i < startingDay; i++) {
     generatedCalendar[0].push(new Date(previousMonthYear, previousMonth, previousMonthStart++));
   }
-  console.log(generatedCalendar)
   for (let i = 0; i < 6; i++) {
     let week = [];
     let firstLineLength = generatedCalendar[0].length;
@@ -123,7 +121,6 @@ function generateCalendar() {
 function monthPick(num) {
   chosenMonth.value = num;
   generateCalendar();
-  console.log(calendar.value);
 }
 
 function chooseDate(date) {

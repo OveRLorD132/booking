@@ -197,7 +197,6 @@ function processUpload(image) {
 let fileInput = ref();
 
 async function handleFileUpload(event) {
-    console.log(event.target.files);
     let files = fileInput.value.files;
     try {
         await emitUpload(files);
@@ -248,8 +247,8 @@ async function handleFileUpload(event) {
 }
 
 .fullImage {
-    max-width: 1000px;
-    max-height: 1000px;
+    max-width: 80%;
+    max-height: 80%;
 }
 
 .imagesCont {

@@ -53,11 +53,12 @@ let profile = ref(null);
 
 let messages = ref(null);
 
+axios.get('/flash-messages').then(({ data }) => messages.value = data);
+
 let profileRight = ref(null);
 
 function setProfile(user) {
     profile.value = user;
-    console.log(profile);
 }
 
 async function commitChanges(obj) {
@@ -118,7 +119,6 @@ function hideDialog() {
 
 async function showError() {
     let { data } = await axios.get('/flash-messages');
-    console.log(data);
     messages.value = data;
 }
 </script>

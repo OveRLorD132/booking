@@ -55,7 +55,6 @@ watch(editedDescription, (newValue) => {
     validation.validateDescription(newValue, editedType.value);
     descriptionError.value = '';
   } catch(err) {
-    console.log(err);
     descriptionError.value = err.message;
   }
 })

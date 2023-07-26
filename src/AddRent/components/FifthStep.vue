@@ -2,15 +2,20 @@
     <div class="mainStepContainer">
         <h1>Enter a header</h1>
         <input class="mainInput headerInput" type="text" placeholder="Header" v-model="header"/>
+        <div class="error-text">{{ headerError }}</div>
         <h1>Enter price per day</h1>
         <input type="text" class="mainInput headerInput" placeholder="Price" v-model="price"/>
+        <div class="error-text">{{ priceError }}</div>
         <h1>Enter description</h1>
         <textarea class="mainInput descriptionInput" v-model="description"></textarea>
+        <div class="error-text">{{ descriptionError }}</div>
     </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue';
+
+import rentValidation from '../../../module/rent-change/rent-validation';
 
 let header = ref(null);
 
@@ -24,16 +29,44 @@ let emits = defineEmits({
     'price-input': (price) => typeof price === "number",
 })
 
+let headerError = ref(null);
+
 watch(header, (newValue) => {
-    emits('header-input', newValue);
+    try {
+        rentValidation.validateHeader(newValue);
+        emits('header-input', newValue);
+        headerError.value = null;
+    } catch (err) {
+        emits('header-input', '');
+        headerError.value = err;
+    }
 })
+
+let descriptionError = ref(null);
 
 watch(description, (newValue) => {
-    emits('description-input', newValue);
+    try {
+        rentValidation.validateDescription(newValue);
+        emits('description-input', newValue);
+        descriptionError.value = null;
+    } catch (err) {
+        emits('description-input', '');
+        descriptionError.value = err;
+    }
 })
 
+let priceError = ref(null);
+
 watch(price, (newValue) => {
-    emits('price-input', newValue);
+    try {
+        rentValidation.validatePrice(newValue);
+        emits('price-input', newValue);
+        priceError.value = null;
+    } catch (err) {
+        emits('price-input', '');
+        priceError.value = err;
+    }
+
 })
 </script>
 

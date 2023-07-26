@@ -1,19 +1,7 @@
-import pgk from "pg";
-
-let { Client } = pgk;
-
 export default class Users {
-  constructor() {
-    this.client = new Client({
-      user: "postgres",
-      password: "password",
-      database: "booking",
-    });
-    this.client.connect();
-  }
   getById(id) {
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         `SELECT * FROM users WHERE id = $1`,
         [id],
         (err, result) => {
@@ -25,7 +13,7 @@ export default class Users {
   }
   getByUsername(username) {
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         `SELECT * FROM users WHERE username = $1`,
         [username],
         (err, result) => {
@@ -41,7 +29,7 @@ export default class Users {
         phone_number, birth_date, type, country, description) 
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id, type`;
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         query,
         [
           obj.username,
@@ -65,7 +53,7 @@ export default class Users {
   }
   addToWishlist(id, user_id) {
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         `UPDATE users SET wishlist = wishlist || $1 WHERE id = $2`,
         [[id], user_id],
         (err, result) => {
@@ -77,7 +65,7 @@ export default class Users {
   }
   removeFromWishlist(id, user_id) {
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         `UPDATE users SET wishlist = array_remove(wishlist, $1) WHERE id = $2`,
         [+id, user_id],
         (err, result) => {
@@ -90,7 +78,7 @@ export default class Users {
   changeUserProperty(name, value, id) {
     return new Promise((resolve, reject) => {
       let query = `UPDATE users SET ${name} = $1 WHERE id = $2`;
-      this.client.query(query, [value, id], (err, result) => {
+      globalThis.DbClient.query(query, [value, id], (err, result) => {
         if (err) reject(err);
         else resolve(result.rowCount);
       });
@@ -98,7 +86,7 @@ export default class Users {
   }
   checkUsernameUnique(username) {
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         `SELECT username FROM users WHERE username = $1`,
         [username],
         (err, result) => {
@@ -110,7 +98,7 @@ export default class Users {
   }
   checkEmailUnique(email) {
     return new Promise((resolve, reject) => {
-      this.client.query(
+      globalThis.DbClient.query(
         `SELECT email FROM users WHERE email = $1`,
         [email],
         (err, result) => {
@@ -122,9 +110,17 @@ export default class Users {
   }
   getPublicProfile(id) {
     return new Promise((resolve, reject) => {
-      this.client.query(`SELECT id, first_name, join_date, type, description FROM users WHERE id = $1`, [id], (err, result) => {
+      globalThis.DbClient.query(`SELECT id, first_name, join_date, type, description FROM users WHERE id = $1`, [id], (err, result) => {
         if(err) reject(err);
         else resolve(result.rows[0]);
+      })
+    })
+  }
+  getPassword(id) {
+    return new Promise((resolve, reject) => {
+      globalThis.DbClient.query(`SELECT password FROM users WHERE id = $1`, [id], (err, result) => {
+        if(err) reject(err);
+        else resolve(result.rows[0].password);
       })
     })
   }

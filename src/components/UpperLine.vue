@@ -140,7 +140,7 @@ function hideNotifications(e) {
 
 .lineMainContainer {
     position: sticky;
-    z-index: 1;
+    z-index: 2;
     width: 100%;
     top:0;
     background-color: #ffffff;

@@ -37,14 +37,15 @@ router.get('/booking/rent/:rentId', rentHiddenCheck, async(req, res) => {
 router.get('/booking/rent/:rentId/rent', async(req, res) => {
     try {
         let result = await rent.getRentById(req.params.rentId);
-        if(req.user && req.user.id == result.user_id) res.send(result);
-        else if(result.is_hidden) {
+        if(req.user && result && req.user.id == result.user_id) res.send(result);
+        else if(result && result.is_hidden) {
             res.status(403);
             res.send('Error! No Access');
         }
         else res.send(result);
     } catch(err) {
         console.error(err);
+        res.status(500).send('Internal Server Error');
     }
 })
 
@@ -62,6 +63,29 @@ router.patch('/rent/change-coords', authCheck.authCheckClient, rentUserCheck, as
 
 router.patch('/rent/change-images', authCheck.authCheckClient, rentUserCheck, async(req, res) => {
     let { images, rent_id } = req.body;
+    for(let photo of images) {
+        let strings = photo.src.split(',');
+        let extension
+        switch (strings[0]) {
+            case "data:image/jpeg;base64":
+                extension = "jpeg";
+                break;
+            case "data:image/png;base64":
+                extension = "png";
+                break;
+            case 'data:image/webp;base64':
+                extension = "webp";
+            default:
+                extension = "other";
+                break;
+        }
+        if(extension === 'other') {
+            res.status(400);
+            req.flash('error', 'Invalid File Format');
+            res.send('Bad Request');
+            return;
+        }
+    }
     await staticPhotos.changePhotos(images, rent_id);
     res.status(200);
     res.send(images);
@@ -117,6 +141,16 @@ router.patch('/rent/change-properties', authCheck.authCheckClient, rentUserCheck
         return;
     }
 
+})
+
+router.get('/rent/comments/load', async (req, res) => {
+    try {
+        let comments = await Comments.prototype.loadComments(req.body.rent_id);
+        res.status(200).send(comments);
+    } catch(err) {
+        req.flash('error', 'Internal Server Error');
+        res.status(500).send('Error');
+    }
 })
 
 router.patch('/rent/comment/edit', authCheck.authCheckClient, commentUserCheck, async (req, res) => {
