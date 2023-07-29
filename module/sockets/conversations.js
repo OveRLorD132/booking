@@ -67,6 +67,10 @@ export default function (socket, io) {
   });
   socket.on("conversation-message", async (message) => {
     if (!message) return;
+    if(message.length > 300) {
+      socket.emit('message-error', `Message is too long`);
+      return;
+    }
     if (
       socket.request.session.passport &&
       socket.request.session.passport.user

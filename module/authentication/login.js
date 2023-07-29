@@ -2,7 +2,7 @@ import UserRepostitory from "../db/postgres/Users.js";
 
 let userRepostitory = new UserRepostitory();
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 export default async function login(username, password, done) {
     try {

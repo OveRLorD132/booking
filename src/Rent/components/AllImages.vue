@@ -11,7 +11,7 @@
             </div>
         </Transition>
         <div class="upload-dialog" v-if="isUploading" @click="closeUpload">
-            <div class="upload-container" :class="isHovered ? 'expanded' : ''" @dragover="handleDragOver"
+            <div class="image-upload-container" :class="isHovered ? 'expanded' : ''" @dragover="handleDragOver"
              @dragleave.stop="handleDragLeave" @drop="handleFileDrop"
             >
                 <div class="upload-border">
@@ -91,7 +91,6 @@ let emits = defineEmits({
 let chosenImage = ref(undefined);
 
 function onImageChoose(index) {
-    console.log(index);
     chosenImage.value = index;
 }
 
@@ -337,7 +336,7 @@ async function handleFileUpload(event) {
     justify-content: center;
 }
 
-.upload-container {
+.image-upload-container {
     padding: 10px 10px 10px 10px;
     width: 550px;
     height: 250px;

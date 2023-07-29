@@ -16,7 +16,7 @@ export default class Rent {
   loadList() {
     return new Promise((resolve, reject) => {
       globalThis.DbClient.query(
-        `SELECT users.username AS user_name, rental_properties.* FROM users 
+        `SELECT users.first_name AS user_name, rental_properties.* FROM users 
         INNER JOIN rental_properties ON users.id = rental_properties.user_id
         WHERE is_hidden = false`,
         [],
@@ -145,7 +145,9 @@ export default class Rent {
   }
   getAds(id) {
     return new Promise((resolve, reject) => {
-      globalThis.DbClient.query(`SELECT * FROM rental_properties WHERE user_id = $1`, [id], (err, result) => {
+      globalThis.DbClient.query(`SELECT rental_properties.*, users.first_name AS user_name FROM rental_properties INNER JOIN users 
+      ON rental_properties.user_id = users.id 
+      WHERE user_id = $1`, [id], (err, result) => {
         if(err) reject(err);
         else resolve(result.rows);
       })

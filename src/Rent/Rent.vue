@@ -216,7 +216,6 @@ let images = ref(null);
 let editIsVisible = ref(false);
 
 watch(() => props.rent, (newValue) => {
-    console.log(props.rent);
     rent.value = newValue;
     axios.get('/rent/comments/load', { rent_id: props.rent.id}).then(({ data }) => {
         comments.value = data;
@@ -231,7 +230,6 @@ watch(() => props.rent, (newValue) => {
 
 
 function showAllImages() {
-    console.log(props);
     allImagesIsVisible.value = true;
     document.documentElement.classList.add('hide-html-overflow');
 }

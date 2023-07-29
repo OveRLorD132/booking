@@ -2,7 +2,7 @@ import express from "express";
 
 import passport from '../module/authentication/passport-config.js';
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 import validation from "../module/user-properties-change/validation.js";
 

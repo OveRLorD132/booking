@@ -1,23 +1,14 @@
 import { Redis } from "ioredis";
 
-let redis = new Redis();
-
-import pgk from "pg";
-
-let { Client } = pgk;
-
-let client = new Client({
-  user: "postgres",
-  password: "password",
-  database: "booking",
+let redis = new Redis({
+  //host: 'redis',
+  port: 6379
 });
-
-client.connect();
 
 export default class {
   async addNotification(user_id, header, text, type) {
     return new Promise((resolve, reject) => {
-      client.query(
+      globalThis.DbClient.query(
         `SELECT uuid_generate_v4() as id`,
         [],
         async (err, result) => {

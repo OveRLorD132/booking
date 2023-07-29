@@ -2,11 +2,13 @@ import createHttpError  from 'http-errors';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
-import { createServer } from 'http';
+import { createServer } from 'https';
 
 import { sessionMiddleware } from './module/authentication/session.js';
 
 import postgresConnect from './module/db/postgres/postgres-connect.js';
+
+import fs from 'fs';
 
 postgresConnect();
 
@@ -24,7 +26,10 @@ import passwordChangeRouter from './routes/password-change.js';
 
 let app = express();
 
-let server = createServer(app).listen(3000);
+let server = createServer({
+  key: fs.readFileSync('./https-keys/key.pem'),
+  cert: fs.readFileSync('./https-keys/cert.pem')
+},app).listen(3000);
 
 export default server;
 
@@ -37,8 +42,8 @@ app.set('views', 'views');
 app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
-app.use(express.json({ limit: '10mb'}));
-app.use(express.urlencoded({ limit: '10mb',extended: true }));
+app.use(express.json({ limit: '40mb'}));
+app.use(express.urlencoded({ limit: '40mb',extended: true }));
 app.use(cookieParser());
 app.use(express.static('public'));
 

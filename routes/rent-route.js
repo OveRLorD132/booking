@@ -64,7 +64,7 @@ router.patch('/rent/change-coords', authCheck.authCheckClient, rentUserCheck, as
 router.patch('/rent/change-images', authCheck.authCheckClient, rentUserCheck, async(req, res) => {
     let { images, rent_id } = req.body;
     for(let photo of images) {
-        let strings = photo.src.split(',');
+        let strings = photo.split(',');
         let extension
         switch (strings[0]) {
             case "data:image/jpeg;base64":

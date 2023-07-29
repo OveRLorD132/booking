@@ -5,7 +5,7 @@ import Users from "../module/db/postgres/Users.js";
 
 let users = new Users();
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import validation from "../module/user-properties-change/validation.js";
 
 let router = Router();
