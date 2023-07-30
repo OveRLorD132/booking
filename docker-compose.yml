@@ -2,10 +2,7 @@ version: '3'
 
 services:
   booking:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: booking
+    image: overlord132/booking
     container_name: booking-container
     restart: always
     ports:
