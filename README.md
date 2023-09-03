@@ -2,7 +2,7 @@
 
 ## Description
 
-The booking platform is a web application that server as a platform for renting and booking various types if properties, such as apartments, houses, rooms, and more. It enables users to find, list and add ads, they are also able to interact with each other through messaging and leaving comments.
+The booking platform is a web application that server as a platform for renting and booking various types of properties, such as apartments, houses, rooms, and more. It enables users to find, list and add ads, they are also able to interact with each other through messaging and leaving comments.
 
 ### Key Features:
 
